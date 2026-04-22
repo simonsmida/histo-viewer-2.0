@@ -1,0 +1,61 @@
+{
+  "id": "case-01",
+  "label": "Sample 1",
+  "slide_path": "slide.png",
+  "viewer_width": 5204,
+  "viewer_height": 5000,
+  "source_width": 7641,
+  "source_height": 7342,
+  "patch_size": 96,
+  "default_concept_id": "concept-0162",
+  "concepts": [
+    {
+      "id": "concept-0162",
+      "label": "Potential concept 162",
+      "positive_patch_count": 1456,
+      "max_score": 18.188732147216797,
+      "overlay_path": "concepts/concept-0162/overlay.png",
+      "patches_path": "concepts/concept-0162/patches.csv"
+    },
+    {
+      "id": "concept-0152",
+      "label": "Potential concept 152",
+      "positive_patch_count": 966,
+      "max_score": 7.122926712036133,
+      "overlay_path": "concepts/concept-0152/overlay.png",
+      "patches_path": "concepts/concept-0152/patches.csv"
+    },
+    {
+      "id": "concept-1513",
+      "label": "Potential concept 1513",
+      "positive_patch_count": 823,
+      "max_score": 7.040805339813232,
+      "overlay_path": "concepts/concept-1513/overlay.png",
+      "patches_path": "concepts/concept-1513/patches.csv"
+    },
+    {
+      "id": "concept-0976",
+      "label": "Potential concept 976",
+      "positive_patch_count": 787,
+      "max_score": 6.309270858764648,
+      "overlay_path": "concepts/concept-0976/overlay.png",
+      "patches_path": "concepts/concept-0976/patches.csv"
+    },
+    {
+      "id": "concept-0167",
+      "label": "Potential concept 167",
+      "positive_patch_count": 568,
+      "max_score": 1.5093488693237305,
+      "overlay_path": "concepts/concept-0167/overlay.png",
+      "patches_path": "concepts/concept-0167/patches.csv"
+    },
+    {
+      "id": "concept-2032",
+      "label": "Potential concept 2032",
+      "positive_patch_count": 311,
+      "max_score": 1.7124884128570557,
+      "overlay_path": "concepts/concept-2032/overlay.png",
+      "patches_path": "concepts/concept-2032/patches.csv"
+    }
+  ]
+}
