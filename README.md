@@ -1,6 +1,7 @@
 # Histo Viewer 2.0
 
-Minimal histology heatmap viewer built from the original `Heatmap.Viewer` design language, but simplified for pathologist-facing review.
+NOTE: Histology viewer revibe-coded based on Patrik's originally vibe-coded (https://github.com/0Kozlik0/Heatmap.Viewer)[Heatmap.Viewer] (thank you!).
+
 
 ## What Is Included
 
