@@ -1,6 +1,6 @@
 # Histo Viewer 2.0
 
-NOTE: Histology viewer revibe-coded based on Patrik's originally vibe-coded (https://github.com/0Kozlik0/Heatmap.Viewer)[Heatmap.Viewer] (thank you!).
+NOTE: Histology viewer revibe-coded based on Patrik's originally vibe-coded [Heatmap.Viewer](https://github.com/0Kozlik0/Heatmap.Viewer) (thank you!).
 
 
 ## What Is Included
