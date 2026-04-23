@@ -523,7 +523,7 @@ async function loadCase(caseId) {
   elements.statusDims.textContent =
     `Source ${state.currentCase.source_width.toLocaleString()} x ${state.currentCase.source_height.toLocaleString()} px · viewer ${state.currentCase.viewer_width.toLocaleString()} x ${state.currentCase.viewer_height.toLocaleString()} px`;
   elements.viewerControls.hidden = false;
-  viewer.open(`/api/cases/${encodeURIComponent(caseId)}.dzi`);
+  viewer.open(state.currentCase.base_dzi_url);
   await loadAnnotations();
 }
 

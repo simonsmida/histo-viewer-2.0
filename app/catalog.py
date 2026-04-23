@@ -3,7 +3,6 @@ from __future__ import annotations
 import csv
 import json
 from dataclasses import dataclass
-from functools import lru_cache
 from pathlib import Path
 
 from fastapi import HTTPException
@@ -21,6 +20,8 @@ class Concept:
     max_score: float
     overlay_path: Path
     patches_path: Path
+    overlay_revision: str
+    patches_revision: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,6 +35,7 @@ class Case:
     source_height: int
     patch_size: int
     default_concept_id: str
+    slide_revision: str
     concepts: tuple[Concept, ...]
 
 
@@ -59,34 +61,41 @@ def _read_json(path: Path) -> dict:
         raise RuntimeError(f"Missing required file: {path}") from exc
 
 
+def _path_revision(path: Path) -> str:
+    return str(path.stat().st_mtime_ns)
+
+
 def _load_case(case_dir: Path) -> Case:
     payload = _read_json(case_dir / "case.json")
+    slide_path = case_dir / payload["slide_path"]
     concepts = tuple(
         Concept(
             id=entry["id"],
             label=entry["label"],
             positive_patch_count=int(entry["positive_patch_count"]),
             max_score=float(entry["max_score"]),
-            overlay_path=case_dir / entry["overlay_path"],
-            patches_path=case_dir / entry["patches_path"],
+            overlay_path=(case_dir / entry["overlay_path"]),
+            patches_path=(case_dir / entry["patches_path"]),
+            overlay_revision=_path_revision(case_dir / entry["overlay_path"]),
+            patches_revision=_path_revision(case_dir / entry["patches_path"]),
         )
         for entry in payload["concepts"]
     )
     return Case(
         id=payload["id"],
         label=payload["label"],
-        slide_path=case_dir / payload["slide_path"],
+        slide_path=slide_path,
         viewer_width=int(payload["viewer_width"]),
         viewer_height=int(payload["viewer_height"]),
         source_width=int(payload["source_width"]),
         source_height=int(payload["source_height"]),
         patch_size=int(payload["patch_size"]),
         default_concept_id=payload["default_concept_id"],
+        slide_revision=_path_revision(slide_path),
         concepts=concepts,
     )
 
 
-@lru_cache(maxsize=1)
 def load_cases() -> dict[str, Case]:
     cases: dict[str, Case] = {}
     for case_dir in sorted(CASES_DIR.iterdir()):
@@ -109,6 +118,7 @@ def list_cases() -> list[dict]:
             "patch_size": case.patch_size,
             "concept_count": len(case.concepts),
             "default_concept_id": case.default_concept_id,
+            "base_dzi_url": f"/api/cases/{case.id}/{case.slide_revision}.dzi",
         }
         for case in load_cases().values()
     ]
@@ -141,7 +151,6 @@ def list_concepts(case_id: str) -> list[dict]:
     ]
 
 
-@lru_cache(maxsize=24)
 def load_patches(case_id: str, concept_id: str) -> tuple[Patch, ...]:
     case = get_case(case_id)
     concept = get_concept(case_id, concept_id)
@@ -188,7 +197,7 @@ def concept_detail(case_id: str, concept_id: str) -> dict:
         "label": concept.label,
         "positive_patch_count": concept.positive_patch_count,
         "max_score": concept.max_score,
-        "overlay_dzi_url": f"/api/cases/{case.id}/concepts/{concept.id}.dzi",
+        "overlay_dzi_url": f"/api/cases/{case.id}/concepts/{concept.id}/{concept.overlay_revision}.dzi",
         "patches": [
             {
                 "rank": patch.rank,
@@ -203,7 +212,7 @@ def concept_detail(case_id: str, concept_id: str) -> dict:
                 "relative_score": patch.relative_score,
                 "tissue_fraction": patch.tissue_fraction,
                 "thumbnail_url": (
-                    f"/api/cases/{case.id}/concepts/{concept.id}/patches/{patch.rank}.png"
+                    f"/api/cases/{case.id}/concepts/{concept.id}/patches/{patch.rank}.png?rev={concept.patches_revision}"
                 ),
             }
             for patch in patches

@@ -6,7 +6,7 @@ NOTE: Histology viewer revibe-coded based on Patrik's originally vibe-coded (htt
 ## What Is Included
 
 - 2 local histology images packaged inside the repo
-- 6 curated potential concepts for each image
+- shared SAE neuron overlays synced across every image
 - heatmap overlay toggle with opacity control
 - top activating patch browser for each concept
 - annotation drawing, save, export, and import
@@ -50,11 +50,30 @@ histo-viewer-2.0/
 `- run.py
 ```
 
+## Syncing Shared SAE Neurons
+
+Use the sync script whenever you want the same SAE neurons to be available for every case:
+
+```bash
+python3 scripts/sync_shared_sae_neurons.py \
+  --sae-type batchtopk_latent2048_l048_seed0 \
+  --neurons 31 44 51 107 152 162 167 207 252 444 551 580 751 1151 1575
+```
+
+The script:
+
+- rebuilds `overlay.png` as the clean interpolated colormap heatmap plus `patches.csv` for every listed neuron in every case
+- updates each `case.json` so all cases expose the same neuron list
+- removes old concept folders that are no longer in the shared selection
+
+Each case also stores a `source_image_slug` in `case.json`. If you add a new case later, set that field to the matching source image slug from `Research/FoundationModels/CONCH/mego-ctc/visualizations/by_image/`, then rerun the script.
+
 ## Adding More Images Later
 
 1. Create a new folder under `data/cases/`.
 2. Add a `slide.png` preview image.
-3. Add one `overlay.png` and one `patches.csv` for each potential concept.
-4. Create a `case.json` matching the existing examples in `data/cases/case-01/` and `data/cases/case-02/`.
+3. Create a `case.json` matching the existing examples in `data/cases/case-01/` and `data/cases/case-02/`.
+4. Set `source_image_slug` in that `case.json`.
+5. Run `scripts/sync_shared_sae_neurons.py` to populate the shared neuron overlays.
 
 The backend auto-discovers every case folder that contains a valid `case.json`.

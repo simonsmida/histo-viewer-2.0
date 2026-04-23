@@ -29,6 +29,10 @@ app = FastAPI(title="Histo Viewer 2.0")
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
+VERSIONED_CACHE_HEADERS = {"Cache-Control": "public, max-age=31536000, immutable"}
+NO_STORE_HEADERS = {"Cache-Control": "no-store"}
+
+
 @app.get("/")
 def index() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
@@ -57,6 +61,7 @@ def api_case_info(case_id: str) -> dict:
         "patch_size": case.patch_size,
         "default_concept_id": case.default_concept_id,
         "concept_count": len(case.concepts),
+        "base_dzi_url": f"/api/cases/{case.id}/{case.slide_revision}.dzi",
     }
 
 
@@ -69,7 +74,14 @@ def api_concepts(case_id: str) -> list[dict]:
 def api_case_dzi(case_id: str) -> Response:
     case = get_case(case_id)
     xml = deep_zoom_descriptor(case.viewer_width, case.viewer_height, BASE_FORMAT)
-    return Response(content=xml, media_type="application/xml")
+    return Response(content=xml, media_type="application/xml", headers=NO_STORE_HEADERS)
+
+
+@app.get("/api/cases/{case_id}/{revision}.dzi")
+def api_case_dzi_versioned(case_id: str, revision: str) -> Response:
+    case = get_case(case_id)
+    xml = deep_zoom_descriptor(case.viewer_width, case.viewer_height, BASE_FORMAT)
+    return Response(content=xml, media_type="application/xml", headers=VERSIONED_CACHE_HEADERS)
 
 
 @app.get("/api/cases/{case_id}_files/{level:int}/{col:int}_{row:int}.{fmt}")
@@ -77,7 +89,15 @@ def api_case_tile(case_id: str, level: int, col: int, row: int, fmt: str) -> Res
     case = get_case(case_id)
     data = render_tile(case.slide_path, "RGB", level, col, row, fmt)
     media_type = "image/jpeg" if fmt in {"jpeg", "jpg"} else "image/png"
-    return Response(content=data, media_type=media_type, headers={"Cache-Control": "public, max-age=3600"})
+    return Response(content=data, media_type=media_type, headers=NO_STORE_HEADERS)
+
+
+@app.get("/api/cases/{case_id}/{revision}_files/{level:int}/{col:int}_{row:int}.{fmt}")
+def api_case_tile_versioned(case_id: str, revision: str, level: int, col: int, row: int, fmt: str) -> Response:
+    case = get_case(case_id)
+    data = render_tile(case.slide_path, "RGB", level, col, row, fmt)
+    media_type = "image/jpeg" if fmt in {"jpeg", "jpg"} else "image/png"
+    return Response(content=data, media_type=media_type, headers=VERSIONED_CACHE_HEADERS)
 
 
 @app.get("/api/cases/{case_id}/concepts/{concept_id}.dzi")
@@ -85,7 +105,15 @@ def api_concept_dzi(case_id: str, concept_id: str) -> Response:
     case = get_case(case_id)
     get_concept(case_id, concept_id)
     xml = deep_zoom_descriptor(case.viewer_width, case.viewer_height, OVERLAY_FORMAT)
-    return Response(content=xml, media_type="application/xml")
+    return Response(content=xml, media_type="application/xml", headers=NO_STORE_HEADERS)
+
+
+@app.get("/api/cases/{case_id}/concepts/{concept_id}/{revision}.dzi")
+def api_concept_dzi_versioned(case_id: str, concept_id: str, revision: str) -> Response:
+    case = get_case(case_id)
+    get_concept(case_id, concept_id)
+    xml = deep_zoom_descriptor(case.viewer_width, case.viewer_height, OVERLAY_FORMAT)
+    return Response(content=xml, media_type="application/xml", headers=VERSIONED_CACHE_HEADERS)
 
 
 @app.get("/api/cases/{case_id}/concepts/{concept_id}")
@@ -98,7 +126,23 @@ def api_concept_tile(case_id: str, concept_id: str, level: int, col: int, row: i
     concept = get_concept(case_id, concept_id)
     data = render_tile(concept.overlay_path, "RGBA", level, col, row, fmt)
     media_type = "image/jpeg" if fmt in {"jpeg", "jpg"} else "image/png"
-    return Response(content=data, media_type=media_type, headers={"Cache-Control": "public, max-age=3600"})
+    return Response(content=data, media_type=media_type, headers=NO_STORE_HEADERS)
+
+
+@app.get("/api/cases/{case_id}/concepts/{concept_id}/{revision}_files/{level:int}/{col:int}_{row:int}.{fmt}")
+def api_concept_tile_versioned(
+    case_id: str,
+    concept_id: str,
+    revision: str,
+    level: int,
+    col: int,
+    row: int,
+    fmt: str,
+) -> Response:
+    concept = get_concept(case_id, concept_id)
+    data = render_tile(concept.overlay_path, "RGBA", level, col, row, fmt)
+    media_type = "image/jpeg" if fmt in {"jpeg", "jpg"} else "image/png"
+    return Response(content=data, media_type=media_type, headers=VERSIONED_CACHE_HEADERS)
 
 
 @app.get("/api/cases/{case_id}/concepts/{concept_id}/patches/{rank:int}.png")
@@ -133,7 +177,7 @@ def api_patch_thumbnail(case_id: str, concept_id: str, rank: int, size: int = 12
     return Response(
         content=buffer.getvalue(),
         media_type="image/png",
-        headers={"Cache-Control": "public, max-age=3600"},
+        headers=NO_STORE_HEADERS,
     )
 
 

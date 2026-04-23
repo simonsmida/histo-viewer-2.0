@@ -41,8 +41,8 @@ class RasterSlide:
         return canvas
 
 
-@lru_cache(maxsize=4)
-def load_slide(path_value: str, mode: str) -> RasterSlide:
+@lru_cache(maxsize=16)
+def load_slide(path_value: str, mode: str, revision: str) -> RasterSlide:
     return RasterSlide(Path(path_value), mode)
 
 
@@ -57,7 +57,7 @@ def deep_zoom_descriptor(width: int, height: int, image_format: str) -> str:
 
 
 def render_tile(path: Path, mode: str, level: int, col: int, row: int, image_format: str) -> bytes:
-    slide = load_slide(str(path), mode)
+    slide = load_slide(str(path), mode, str(path.stat().st_mtime_ns))
     width, height = slide.dimensions
 
     max_level = math.ceil(math.log2(max(width, height)))

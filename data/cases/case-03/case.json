@@ -1,0 +1,135 @@
+{
+  "id": "case-03",
+  "label": "Sample 3",
+  "slide_path": "slide.png",
+  "viewer_width": 4961,
+  "viewer_height": 5000,
+  "source_width": 7921,
+  "source_height": 7983,
+  "patch_size": 96,
+  "default_concept_id": "concept-0031",
+  "concepts": [
+    {
+      "id": "concept-0031",
+      "label": "Potential concept 31",
+      "positive_patch_count": 0,
+      "max_score": 0.0,
+      "overlay_path": "concepts/concept-0031/overlay.png",
+      "patches_path": "concepts/concept-0031/patches.csv"
+    },
+    {
+      "id": "concept-0044",
+      "label": "Potential concept 44",
+      "positive_patch_count": 0,
+      "max_score": 0.0,
+      "overlay_path": "concepts/concept-0044/overlay.png",
+      "patches_path": "concepts/concept-0044/patches.csv"
+    },
+    {
+      "id": "concept-0051",
+      "label": "Potential concept 51",
+      "positive_patch_count": 29,
+      "max_score": 0.9560469388961792,
+      "overlay_path": "concepts/concept-0051/overlay.png",
+      "patches_path": "concepts/concept-0051/patches.csv"
+    },
+    {
+      "id": "concept-0107",
+      "label": "Potential concept 107",
+      "positive_patch_count": 133,
+      "max_score": 2.189159631729126,
+      "overlay_path": "concepts/concept-0107/overlay.png",
+      "patches_path": "concepts/concept-0107/patches.csv"
+    },
+    {
+      "id": "concept-0152",
+      "label": "Potential concept 152",
+      "positive_patch_count": 3305,
+      "max_score": 8.77767562866211,
+      "overlay_path": "concepts/concept-0152/overlay.png",
+      "patches_path": "concepts/concept-0152/patches.csv"
+    },
+    {
+      "id": "concept-0162",
+      "label": "Potential concept 162",
+      "positive_patch_count": 3801,
+      "max_score": 20.836421966552734,
+      "overlay_path": "concepts/concept-0162/overlay.png",
+      "patches_path": "concepts/concept-0162/patches.csv"
+    },
+    {
+      "id": "concept-0167",
+      "label": "Potential concept 167",
+      "positive_patch_count": 1452,
+      "max_score": 2.5712435245513916,
+      "overlay_path": "concepts/concept-0167/overlay.png",
+      "patches_path": "concepts/concept-0167/patches.csv"
+    },
+    {
+      "id": "concept-0207",
+      "label": "Potential concept 207",
+      "positive_patch_count": 0,
+      "max_score": 0.0,
+      "overlay_path": "concepts/concept-0207/overlay.png",
+      "patches_path": "concepts/concept-0207/patches.csv"
+    },
+    {
+      "id": "concept-0252",
+      "label": "Potential concept 252",
+      "positive_patch_count": 184,
+      "max_score": 8.104424476623535,
+      "overlay_path": "concepts/concept-0252/overlay.png",
+      "patches_path": "concepts/concept-0252/patches.csv"
+    },
+    {
+      "id": "concept-0444",
+      "label": "Potential concept 444",
+      "positive_patch_count": 0,
+      "max_score": 0.0,
+      "overlay_path": "concepts/concept-0444/overlay.png",
+      "patches_path": "concepts/concept-0444/patches.csv"
+    },
+    {
+      "id": "concept-0551",
+      "label": "Potential concept 551",
+      "positive_patch_count": 4,
+      "max_score": 0.5955584049224854,
+      "overlay_path": "concepts/concept-0551/overlay.png",
+      "patches_path": "concepts/concept-0551/patches.csv"
+    },
+    {
+      "id": "concept-0580",
+      "label": "Potential concept 580",
+      "positive_patch_count": 967,
+      "max_score": 1.3597838878631592,
+      "overlay_path": "concepts/concept-0580/overlay.png",
+      "patches_path": "concepts/concept-0580/patches.csv"
+    },
+    {
+      "id": "concept-0751",
+      "label": "Potential concept 751",
+      "positive_patch_count": 35,
+      "max_score": 0.8857869505882263,
+      "overlay_path": "concepts/concept-0751/overlay.png",
+      "patches_path": "concepts/concept-0751/patches.csv"
+    },
+    {
+      "id": "concept-1151",
+      "label": "Potential concept 1151",
+      "positive_patch_count": 0,
+      "max_score": 0.0,
+      "overlay_path": "concepts/concept-1151/overlay.png",
+      "patches_path": "concepts/concept-1151/patches.csv"
+    },
+    {
+      "id": "concept-1575",
+      "label": "Potential concept 1575",
+      "positive_patch_count": 211,
+      "max_score": 7.110036849975586,
+      "overlay_path": "concepts/concept-1575/overlay.png",
+      "patches_path": "concepts/concept-1575/patches.csv"
+    }
+  ],
+  "source_image_slug": "1005143_9_poloha_618_1_1_EP_0_EMT_1_ANY_1",
+  "sae_type": "batchtopk_latent2048_l048_seed0"
+}
