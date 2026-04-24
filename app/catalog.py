@@ -65,6 +65,13 @@ def _path_revision(path: Path) -> str:
     return str(path.stat().st_mtime_ns)
 
 
+def _dzi_revision(image_path: Path) -> str:
+    dzi_path = image_path.with_suffix(".dzi")
+    if dzi_path.exists():
+        return _path_revision(dzi_path)
+    return _path_revision(image_path)
+
+
 def _load_case(case_dir: Path) -> Case:
     payload = _read_json(case_dir / "case.json")
     slide_path = case_dir / payload["slide_path"]
@@ -76,7 +83,7 @@ def _load_case(case_dir: Path) -> Case:
             max_score=float(entry["max_score"]),
             overlay_path=(case_dir / entry["overlay_path"]),
             patches_path=(case_dir / entry["patches_path"]),
-            overlay_revision=_path_revision(case_dir / entry["overlay_path"]),
+            overlay_revision=_dzi_revision(case_dir / entry["overlay_path"]),
             patches_revision=_path_revision(case_dir / entry["patches_path"]),
         )
         for entry in payload["concepts"]
@@ -91,7 +98,7 @@ def _load_case(case_dir: Path) -> Case:
         source_height=int(payload["source_height"]),
         patch_size=int(payload["patch_size"]),
         default_concept_id=payload["default_concept_id"],
-        slide_revision=_path_revision(slide_path),
+        slide_revision=_dzi_revision(slide_path),
         concepts=concepts,
     )
 

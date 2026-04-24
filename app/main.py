@@ -18,7 +18,7 @@ from .catalog import (
     list_cases,
     list_concepts,
 )
-from .tiles import BASE_FORMAT, OVERLAY_FORMAT, deep_zoom_descriptor, render_tile
+#from .tiles import BASE_FORMAT, OVERLAY_FORMAT, deep_zoom_descriptor, render_tile
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_DIR = BASE_DIR / "static"
