@@ -18,7 +18,7 @@ from .catalog import (
     list_cases,
     list_concepts,
 )
-#from .tiles import BASE_FORMAT, OVERLAY_FORMAT, deep_zoom_descriptor, render_tile
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_DIR = BASE_DIR / "static"
@@ -31,6 +31,33 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 VERSIONED_CACHE_HEADERS = {"Cache-Control": "public, max-age=31536000, immutable"}
 NO_STORE_HEADERS = {"Cache-Control": "no-store"}
+
+
+def _dzi_path(image_path: Path) -> Path:
+    return image_path.with_suffix(".dzi")
+
+
+def _dzi_files_dir(image_path: Path) -> Path:
+    return image_path.with_suffix("").parent / f"{image_path.stem}_files"
+
+
+def _tile_path(image_path: Path, level: int, col: int, row: int, fmt: str) -> Path:
+    return _dzi_files_dir(image_path) / str(level) / f"{col}_{row}.{fmt}"
+
+
+def _file_response(path: Path, media_type: str, headers: dict[str, str]) -> FileResponse:
+    if not path.exists() or not path.is_file():
+        raise HTTPException(status_code=404, detail=f"Missing precomputed file: {path}")
+    return FileResponse(path, media_type=media_type, headers=headers)
+
+
+def _dzi_response(image_path: Path, headers: dict[str, str]) -> FileResponse:
+    return _file_response(_dzi_path(image_path), "application/xml", headers)
+
+
+def _tile_response(image_path: Path, level: int, col: int, row: int, fmt: str, headers: dict[str, str]) -> FileResponse:
+    media_type = "image/jpeg" if fmt in {"jpeg", "jpg"} else "image/png"
+    return _file_response(_tile_path(image_path, level, col, row, fmt), media_type, headers)
 
 
 @app.get("/")
@@ -71,49 +98,41 @@ def api_concepts(case_id: str) -> list[dict]:
 
 
 @app.get("/api/cases/{case_id}.dzi")
-def api_case_dzi(case_id: str) -> Response:
+def api_case_dzi(case_id: str) -> FileResponse:
     case = get_case(case_id)
-    xml = deep_zoom_descriptor(case.viewer_width, case.viewer_height, BASE_FORMAT)
-    return Response(content=xml, media_type="application/xml", headers=NO_STORE_HEADERS)
+    return _dzi_response(case.slide_path, NO_STORE_HEADERS)
 
 
 @app.get("/api/cases/{case_id}/{revision}.dzi")
-def api_case_dzi_versioned(case_id: str, revision: str) -> Response:
+def api_case_dzi_versioned(case_id: str, revision: str) -> FileResponse:
     case = get_case(case_id)
-    xml = deep_zoom_descriptor(case.viewer_width, case.viewer_height, BASE_FORMAT)
-    return Response(content=xml, media_type="application/xml", headers=VERSIONED_CACHE_HEADERS)
+    return _dzi_response(case.slide_path, VERSIONED_CACHE_HEADERS)
 
 
 @app.get("/api/cases/{case_id}_files/{level:int}/{col:int}_{row:int}.{fmt}")
-def api_case_tile(case_id: str, level: int, col: int, row: int, fmt: str) -> Response:
+def api_case_tile(case_id: str, level: int, col: int, row: int, fmt: str) -> FileResponse:
     case = get_case(case_id)
-    data = render_tile(case.slide_path, "RGB", level, col, row, fmt)
-    media_type = "image/jpeg" if fmt in {"jpeg", "jpg"} else "image/png"
-    return Response(content=data, media_type=media_type, headers=NO_STORE_HEADERS)
+    return _tile_response(case.slide_path, level, col, row, fmt, NO_STORE_HEADERS)
 
 
 @app.get("/api/cases/{case_id}/{revision}_files/{level:int}/{col:int}_{row:int}.{fmt}")
-def api_case_tile_versioned(case_id: str, revision: str, level: int, col: int, row: int, fmt: str) -> Response:
+def api_case_tile_versioned(case_id: str, revision: str, level: int, col: int, row: int, fmt: str) -> FileResponse:
     case = get_case(case_id)
-    data = render_tile(case.slide_path, "RGB", level, col, row, fmt)
-    media_type = "image/jpeg" if fmt in {"jpeg", "jpg"} else "image/png"
-    return Response(content=data, media_type=media_type, headers=VERSIONED_CACHE_HEADERS)
+    return _tile_response(case.slide_path, level, col, row, fmt, VERSIONED_CACHE_HEADERS)
 
 
 @app.get("/api/cases/{case_id}/concepts/{concept_id}.dzi")
-def api_concept_dzi(case_id: str, concept_id: str) -> Response:
-    case = get_case(case_id)
-    get_concept(case_id, concept_id)
-    xml = deep_zoom_descriptor(case.viewer_width, case.viewer_height, OVERLAY_FORMAT)
-    return Response(content=xml, media_type="application/xml", headers=NO_STORE_HEADERS)
+def api_concept_dzi(case_id: str, concept_id: str) -> FileResponse:
+    get_case(case_id)
+    concept = get_concept(case_id, concept_id)
+    return _dzi_response(concept.overlay_path, NO_STORE_HEADERS)
 
 
 @app.get("/api/cases/{case_id}/concepts/{concept_id}/{revision}.dzi")
-def api_concept_dzi_versioned(case_id: str, concept_id: str, revision: str) -> Response:
-    case = get_case(case_id)
-    get_concept(case_id, concept_id)
-    xml = deep_zoom_descriptor(case.viewer_width, case.viewer_height, OVERLAY_FORMAT)
-    return Response(content=xml, media_type="application/xml", headers=VERSIONED_CACHE_HEADERS)
+def api_concept_dzi_versioned(case_id: str, concept_id: str, revision: str) -> FileResponse:
+    get_case(case_id)
+    concept = get_concept(case_id, concept_id)
+    return _dzi_response(concept.overlay_path, VERSIONED_CACHE_HEADERS)
 
 
 @app.get("/api/cases/{case_id}/concepts/{concept_id}")
@@ -122,11 +141,9 @@ def api_concept_detail(case_id: str, concept_id: str) -> dict:
 
 
 @app.get("/api/cases/{case_id}/concepts/{concept_id}_files/{level:int}/{col:int}_{row:int}.{fmt}")
-def api_concept_tile(case_id: str, concept_id: str, level: int, col: int, row: int, fmt: str) -> Response:
+def api_concept_tile(case_id: str, concept_id: str, level: int, col: int, row: int, fmt: str) -> FileResponse:
     concept = get_concept(case_id, concept_id)
-    data = render_tile(concept.overlay_path, "RGBA", level, col, row, fmt)
-    media_type = "image/jpeg" if fmt in {"jpeg", "jpg"} else "image/png"
-    return Response(content=data, media_type=media_type, headers=NO_STORE_HEADERS)
+    return _tile_response(concept.overlay_path, level, col, row, fmt, NO_STORE_HEADERS)
 
 
 @app.get("/api/cases/{case_id}/concepts/{concept_id}/{revision}_files/{level:int}/{col:int}_{row:int}.{fmt}")
@@ -138,11 +155,9 @@ def api_concept_tile_versioned(
     col: int,
     row: int,
     fmt: str,
-) -> Response:
+) -> FileResponse:
     concept = get_concept(case_id, concept_id)
-    data = render_tile(concept.overlay_path, "RGBA", level, col, row, fmt)
-    media_type = "image/jpeg" if fmt in {"jpeg", "jpg"} else "image/png"
-    return Response(content=data, media_type=media_type, headers=VERSIONED_CACHE_HEADERS)
+    return _tile_response(concept.overlay_path, level, col, row, fmt, VERSIONED_CACHE_HEADERS)
 
 
 @app.get("/api/cases/{case_id}/concepts/{concept_id}/patches/{rank:int}.png")
