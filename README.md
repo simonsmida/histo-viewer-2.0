@@ -68,6 +68,16 @@ The script:
 
 Each case also stores a `source_image_slug` in `case.json`. If you add a new case later, set that field to the matching source image slug from `Research/FoundationModels/CONCH/mego-ctc/visualizations/by_image/`, then rerun the script.
 
+## Performance Precomputes
+
+The repository already stores Deep Zoom tiles for slides and concept overlays. After pulling fresh data on the server, you can also precompute the patch thumbnails used by the right-side patch browser:
+
+```bash
+python3 scripts/precompute_patch_thumbnails.py --size 128
+```
+
+The app can generate missing thumbnails on demand, but precomputing them makes the first concept selection smoother.
+
 ## Adding More Images Later
 
 1. Create a new folder under `data/cases/`.

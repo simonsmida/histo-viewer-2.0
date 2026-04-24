@@ -9,6 +9,8 @@ const ANNOT_COLORS = [
   "#65a30d",
 ];
 
+const PATCH_BATCH_SIZE = 96;
+
 const viewer = OpenSeadragon({
   id: "viewer",
   prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/images/",
@@ -47,6 +49,7 @@ const elements = {
   opacitySlider: document.getElementById("opacitySlider"),
   patchEmptyState: document.getElementById("patchEmptyState"),
   patchGrid: document.getElementById("patchGrid"),
+  patchMore: document.getElementById("patchMore"),
   rightPanel: document.getElementById("rightPanel"),
   statusCoords: document.getElementById("statusCoords"),
   statusDims: document.getElementById("statusDims"),
@@ -64,6 +67,8 @@ const state = {
   cases: [],
   currentCase: null,
   currentConcept: null,
+  conceptCache: new Map(),
+  conceptRequestToken: 0,
   heatmapItem: null,
   heatmapVisible: true,
   isDrawing: false,
@@ -73,6 +78,7 @@ const state = {
   overlayRequestToken: 0,
   selectedPatchKey: null,
   selectedPatchOverlay: null,
+  visiblePatchCount: PATCH_BATCH_SIZE,
 };
 
 function setStatus(message, isError = false) {
@@ -427,18 +433,24 @@ function updateActivePatchCard() {
   });
 }
 
-function renderPatchGrid() {
+function renderPatchGrid(reset = true) {
   if (!state.currentConcept) {
     elements.patchGrid.innerHTML = "";
     elements.patchEmptyState.style.display = "";
+    elements.patchMore.hidden = true;
     return;
+  }
+
+  if (reset) {
+    state.visiblePatchCount = PATCH_BATCH_SIZE;
   }
 
   elements.patchEmptyState.style.display = "none";
   elements.patchGrid.innerHTML = "";
   const fragment = document.createDocumentFragment();
+  const visiblePatches = state.currentConcept.patches.slice(0, state.visiblePatchCount);
 
-  for (const patch of state.currentConcept.patches) {
+  for (const patch of visiblePatches) {
     const patchKey = `${patch.rank}-${patch.patch_index}`;
     const card = document.createElement("button");
     card.type = "button";
@@ -460,6 +472,12 @@ function renderPatchGrid() {
   }
 
   elements.patchGrid.appendChild(fragment);
+  const remaining = state.currentConcept.patches.length - visiblePatches.length;
+  elements.patchMore.hidden = remaining <= 0;
+  if (remaining > 0) {
+    const nextCount = Math.min(PATCH_BATCH_SIZE, remaining);
+    elements.patchMore.textContent = `Show ${nextCount.toLocaleString()} more`;
+  }
   updateActivePatchCard();
 }
 
@@ -493,14 +511,27 @@ async function loadConcept(conceptId) {
     return;
   }
 
+  const requestToken = ++state.conceptRequestToken;
+  const cacheKey = `${state.currentCase.id}:${conceptId}`;
+
   elements.patchEmptyState.style.display = "";
   elements.patchEmptyState.querySelector("p").textContent = "Loading patches...";
+  elements.patchMore.hidden = true;
   state.selectedPatchKey = null;
   removeSelectedPatchOverlay();
 
-  state.currentConcept = await fetchJson(
+  const cachedConcept = state.conceptCache.get(cacheKey);
+  const concept = cachedConcept || await fetchJson(
     `/api/cases/${encodeURIComponent(state.currentCase.id)}/concepts/${encodeURIComponent(conceptId)}`,
   );
+  if (!cachedConcept) {
+    state.conceptCache.set(cacheKey, concept);
+  }
+  if (requestToken !== state.conceptRequestToken) {
+    return;
+  }
+
+  state.currentConcept = concept;
 
   if (state.heatmapVisible) {
     applyHeatmapOverlay();
@@ -508,15 +539,17 @@ async function loadConcept(conceptId) {
     removeHeatmapOverlay();
   }
 
-  renderPatchGrid();
+  renderPatchGrid(true);
   activateTab("patches");
   setStatus(`${state.currentCase.label} loaded with ${state.currentConcept.label}.`);
 }
 
 async function loadCase(caseId) {
+  state.conceptRequestToken += 1;
   state.currentConcept = null;
   state.selectedPatchKey = null;
   elements.patchGrid.innerHTML = "";
+  elements.patchMore.hidden = true;
   elements.patchEmptyState.style.display = "";
   elements.patchEmptyState.querySelector("p").textContent = "Loading patches...";
   state.currentCase = await fetchJson(`/api/cases/${encodeURIComponent(caseId)}/info`);
@@ -742,6 +775,11 @@ elements.conceptSelect.addEventListener("change", async () => {
     console.error(error);
     setStatus("Failed to load potential concept.", true);
   }
+});
+
+elements.patchMore.addEventListener("click", () => {
+  state.visiblePatchCount += PATCH_BATCH_SIZE;
+  renderPatchGrid(false);
 });
 
 elements.heatmapToggle.addEventListener("click", () => {

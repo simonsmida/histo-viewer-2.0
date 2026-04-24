@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import gzip
+import io
 import json
+from functools import lru_cache
 from pathlib import Path
 
-from fastapi import Body, FastAPI, File, HTTPException, UploadFile
+from fastapi import Body, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
@@ -18,6 +21,7 @@ from .catalog import (
     list_cases,
     list_concepts,
 )
+from .tiles import load_slide
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -58,6 +62,59 @@ def _dzi_response(image_path: Path, headers: dict[str, str]) -> FileResponse:
 def _tile_response(image_path: Path, level: int, col: int, row: int, fmt: str, headers: dict[str, str]) -> FileResponse:
     media_type = "image/jpeg" if fmt in {"jpeg", "jpg"} else "image/png"
     return _file_response(_tile_path(image_path, level, col, row, fmt), media_type, headers)
+
+
+def _json_response(payload: object, request: Request) -> Response:
+    content = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    headers = {"Vary": "Accept-Encoding"}
+    if len(content) >= 1024 and "gzip" in request.headers.get("accept-encoding", ""):
+        headers["Content-Encoding"] = "gzip"
+        content = gzip.compress(content)
+    return Response(content=content, media_type="application/json", headers=headers)
+
+
+def _patch_thumbnail_path(patches_path: Path, rank: int, size: int) -> Path:
+    return patches_path.parent / "patch_thumbnails" / str(size) / f"{rank}.png"
+
+
+@lru_cache(maxsize=4096)
+def _render_patch_thumbnail(
+    case_id: str,
+    concept_id: str,
+    rank: int,
+    output_size: int,
+    slide_revision: str,
+    patches_revision: str,
+) -> bytes:
+    case = get_case(case_id)
+    patch = get_patch(case_id, concept_id, rank)
+
+    scale_x = case.viewer_width / case.source_width
+    scale_y = case.viewer_height / case.source_height
+    crop_left = int(round(patch.source_x * scale_x))
+    crop_top = int(round(patch.source_y * scale_y))
+    crop_width = max(1, int(round(case.patch_size * scale_x)))
+    crop_height = max(1, int(round(case.patch_size * scale_y)))
+
+    slide = load_slide(str(case.slide_path), "RGB", slide_revision)
+    crop_box = (
+        max(0, crop_left),
+        max(0, crop_top),
+        min(slide.dimensions[0], crop_left + crop_width),
+        min(slide.dimensions[1], crop_top + crop_height),
+    )
+    if crop_box[0] >= crop_box[2] or crop_box[1] >= crop_box[3]:
+        raise HTTPException(status_code=404, detail="Patch crop is outside the slide bounds")
+
+    crop = slide.read_region(
+        (crop_box[0], crop_box[1]),
+        (crop_box[2] - crop_box[0], crop_box[3] - crop_box[1]),
+    ).convert("RGB")
+    crop = crop.resize((output_size, output_size), Image.Resampling.LANCZOS)
+
+    buffer = io.BytesIO()
+    crop.save(buffer, format="PNG", optimize=True)
+    return buffer.getvalue()
 
 
 @app.get("/")
@@ -136,8 +193,8 @@ def api_concept_dzi_versioned(case_id: str, concept_id: str, revision: str) -> F
 
 
 @app.get("/api/cases/{case_id}/concepts/{concept_id}")
-def api_concept_detail(case_id: str, concept_id: str) -> dict:
-    return concept_detail(case_id, concept_id)
+def api_concept_detail(case_id: str, concept_id: str, request: Request) -> Response:
+    return _json_response(concept_detail(case_id, concept_id), request)
 
 
 @app.get("/api/cases/{case_id}/concepts/{concept_id}_files/{level:int}/{col:int}_{row:int}.{fmt}")
@@ -163,36 +220,26 @@ def api_concept_tile_versioned(
 @app.get("/api/cases/{case_id}/concepts/{concept_id}/patches/{rank:int}.png")
 def api_patch_thumbnail(case_id: str, concept_id: str, rank: int, size: int = 128) -> Response:
     case = get_case(case_id)
+    concept = get_concept(case_id, concept_id)
     patch = get_patch(case_id, concept_id, rank)
     output_size = max(48, min(size, 256))
 
-    scale_x = case.viewer_width / case.source_width
-    scale_y = case.viewer_height / case.source_height
-    crop_left = int(round(patch.source_x * scale_x))
-    crop_top = int(round(patch.source_y * scale_y))
-    crop_width = max(1, int(round(case.patch_size * scale_x)))
-    crop_height = max(1, int(round(case.patch_size * scale_y)))
+    thumbnail_path = _patch_thumbnail_path(concept.patches_path, patch.rank, output_size)
+    if thumbnail_path.exists() and thumbnail_path.is_file():
+        return FileResponse(thumbnail_path, media_type="image/png", headers=VERSIONED_CACHE_HEADERS)
 
-    with Image.open(case.slide_path) as image:
-        crop_box = (
-            max(0, crop_left),
-            max(0, crop_top),
-            min(image.width, crop_left + crop_width),
-            min(image.height, crop_top + crop_height),
-        )
-        if crop_box[0] >= crop_box[2] or crop_box[1] >= crop_box[3]:
-            raise HTTPException(status_code=404, detail="Patch crop is outside the slide bounds")
-        crop = image.crop(crop_box).convert("RGB")
-        crop = crop.resize((output_size, output_size), Image.Resampling.LANCZOS)
-
-    import io
-
-    buffer = io.BytesIO()
-    crop.save(buffer, format="PNG")
+    content = _render_patch_thumbnail(
+        case.id,
+        concept.id,
+        patch.rank,
+        output_size,
+        case.slide_revision,
+        concept.patches_revision,
+    )
     return Response(
-        content=buffer.getvalue(),
+        content=content,
         media_type="image/png",
-        headers=NO_STORE_HEADERS,
+        headers=VERSIONED_CACHE_HEADERS,
     )
 
 

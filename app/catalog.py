@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 from fastapi import HTTPException
@@ -37,6 +38,7 @@ class Case:
     default_concept_id: str
     slide_revision: str
     concepts: tuple[Concept, ...]
+    concepts_by_id: dict[str, Concept]
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,9 +102,11 @@ def _load_case(case_dir: Path) -> Case:
         default_concept_id=payload["default_concept_id"],
         slide_revision=_dzi_revision(slide_path),
         concepts=concepts,
+        concepts_by_id={concept.id: concept for concept in concepts},
     )
 
 
+@lru_cache(maxsize=1)
 def load_cases() -> dict[str, Case]:
     cases: dict[str, Case] = {}
     for case_dir in sorted(CASES_DIR.iterdir()):
@@ -140,10 +144,10 @@ def get_case(case_id: str) -> Case:
 
 def get_concept(case_id: str, concept_id: str) -> Concept:
     case = get_case(case_id)
-    for concept in case.concepts:
-        if concept.id == concept_id:
-            return concept
-    raise HTTPException(status_code=404, detail=f"Unknown concept: {concept_id}")
+    try:
+        return case.concepts_by_id[concept_id]
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"Unknown concept: {concept_id}") from exc
 
 
 def list_concepts(case_id: str) -> list[dict]:
@@ -158,7 +162,8 @@ def list_concepts(case_id: str) -> list[dict]:
     ]
 
 
-def load_patches(case_id: str, concept_id: str) -> tuple[Patch, ...]:
+@lru_cache(maxsize=256)
+def _load_patches_cached(case_id: str, concept_id: str, patches_revision: str) -> tuple[Patch, ...]:
     case = get_case(case_id)
     concept = get_concept(case_id, concept_id)
     scale_x = case.viewer_width / case.source_width
@@ -188,17 +193,39 @@ def load_patches(case_id: str, concept_id: str) -> tuple[Patch, ...]:
     return tuple(patches)
 
 
+def load_patches(case_id: str, concept_id: str) -> tuple[Patch, ...]:
+    concept = get_concept(case_id, concept_id)
+    return _load_patches_cached(case_id, concept_id, concept.patches_revision)
+
+
+@lru_cache(maxsize=256)
+def _patches_by_rank(case_id: str, concept_id: str, patches_revision: str) -> dict[int, Patch]:
+    return {
+        patch.rank: patch
+        for patch in _load_patches_cached(case_id, concept_id, patches_revision)
+    }
+
+
 def get_patch(case_id: str, concept_id: str, rank: int) -> Patch:
-    for patch in load_patches(case_id, concept_id):
-        if patch.rank == rank:
-            return patch
-    raise HTTPException(status_code=404, detail=f"Unknown patch rank: {rank}")
+    concept = get_concept(case_id, concept_id)
+    try:
+        return _patches_by_rank(case_id, concept_id, concept.patches_revision)[rank]
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"Unknown patch rank: {rank}") from exc
 
 
-def concept_detail(case_id: str, concept_id: str) -> dict:
+@lru_cache(maxsize=256)
+def _concept_detail_cached(
+    case_id: str,
+    concept_id: str,
+    slide_revision: str,
+    overlay_revision: str,
+    patches_revision: str,
+) -> dict:
     case = get_case(case_id)
     concept = get_concept(case_id, concept_id)
-    patches = load_patches(case_id, concept_id)
+    patches = _load_patches_cached(case_id, concept_id, patches_revision)
+    thumbnail_revision = f"{slide_revision}-{patches_revision}"
     return {
         "id": concept.id,
         "label": concept.label,
@@ -219,12 +246,31 @@ def concept_detail(case_id: str, concept_id: str) -> dict:
                 "relative_score": patch.relative_score,
                 "tissue_fraction": patch.tissue_fraction,
                 "thumbnail_url": (
-                    f"/api/cases/{case.id}/concepts/{concept.id}/patches/{patch.rank}.png?rev={concept.patches_revision}"
+                    f"/api/cases/{case.id}/concepts/{concept.id}/patches/{patch.rank}.png?rev={thumbnail_revision}"
                 ),
             }
             for patch in patches
         ],
     }
+
+
+def concept_detail(case_id: str, concept_id: str) -> dict:
+    case = get_case(case_id)
+    concept = get_concept(case_id, concept_id)
+    return _concept_detail_cached(
+        case_id,
+        concept_id,
+        case.slide_revision,
+        concept.overlay_revision,
+        concept.patches_revision,
+    )
+
+
+def clear_catalog_caches() -> None:
+    load_cases.cache_clear()
+    _load_patches_cached.cache_clear()
+    _patches_by_rank.cache_clear()
+    _concept_detail_cached.cache_clear()
 
 
 def annotation_path(case_id: str) -> Path:

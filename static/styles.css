@@ -470,6 +470,16 @@ body {
   background: var(--bg-surface-alt);
 }
 
+.patch-more {
+  width: 100%;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.patch-more[hidden] {
+  display: none;
+}
+
 .info-row {
   display: flex;
   justify-content: space-between;
