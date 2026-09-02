@@ -1118,6 +1118,18 @@ elements.toolPanel.addEventListener("click", () => {
   elements.toolPanel.classList.toggle("active");
 });
 
+let viewportFramePending = false;
+function scheduleViewportRender() {
+  if (viewportFramePending) return;
+  viewportFramePending = true;
+  requestAnimationFrame(() => {
+    viewportFramePending = false;
+    redrawAnnotations();
+    updateStatusZoom();
+    updatePhysicalScale();
+  });
+}
+
 viewer.addHandler("open", () => {
   resizeCanvas();
   redrawAnnotations();
@@ -1127,9 +1139,7 @@ viewer.addHandler("open", () => {
 });
 
 viewer.addHandler("animation", () => {
-  redrawAnnotations();
-  updateStatusZoom();
-  updatePhysicalScale();
+  scheduleViewportRender();
 });
 
 viewer.addHandler("resize", () => {
