@@ -753,8 +753,9 @@ body {
   font-size: 12px;
   box-shadow: var(--shadow-sm);
 }
+.pattern-legend > span { font-weight: 700; }
 .legend-scale { display: flex; align-items: center; gap: 7px; margin: 5px 0; }
-.legend-gradient { width: 96px; height: 9px; border-radius: 4px; background: linear-gradient(to right, #30123b, #466be3, #28bceb, #32f298, #a4fc3c, #eecf3a, #fb8022, #d02f05, #7a0403); }
+.legend-gradient { width: 150px; height: 11px; border-radius: 5px; background: linear-gradient(to right, #30123b, #466be3, #28bceb, #32f298, #a4fc3c, #eecf3a, #fb8022, #d02f05, #7a0403); }
 .image-scale { position: absolute; bottom: 42px; left: 238px; z-index: 50; background: rgba(255,255,255,.95); padding: 8px; border-radius: 4px; font-size: 11px; }
 .image-scale span { display: block; }
 #scaleLine { border: solid var(--text-primary); border-width: 0 2px 2px; height: 6px; margin-bottom: 4px; }
