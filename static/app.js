@@ -19,7 +19,8 @@ const viewer = OpenSeadragon({
   navigatorSizeRatio: 0.15,
   navigatorBackground: "#f5f6f8",
   navigatorBorderColor: "#dfe3e8",
-  animationTime: 0.3,
+  // Give focus changes enough time to follow visually, especially at high zoom.
+  animationTime: 0.65,
   minZoomImageRatio: 0.5,
   maxZoomPixelRatio: 40,
   visibilityRatio: 0.5,
@@ -595,7 +596,8 @@ function focusPatch(patch) {
   const rect = new OpenSeadragon.Rect(patch.viewer_x / state.currentCase.viewer_width,
     patch.viewer_y / state.currentCase.viewer_width, patch.viewer_w / state.currentCase.viewer_width,
     patch.viewer_h / state.currentCase.viewer_width);
-  const margin = rect.width * 6;
+  // Keep a generous tissue context around the patch while the viewer settles.
+  const margin = rect.width * 10;
   viewer.viewport.fitBounds(new OpenSeadragon.Rect(rect.x - margin, rect.y - margin, rect.width + margin * 2, rect.height + margin * 2));
 }
 

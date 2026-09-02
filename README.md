@@ -99,7 +99,7 @@ Subsequent deployments transport code through Git and data through rsync. Never 
 
 The image slider blends the original interpolated Turbo heatmap over the histology image. Both use precomputed Deep Zoom tiles in the same OpenSeadragon viewport, so pan and zoom stay synchronized. The legend runs from weaker to stronger pattern response. The export normalizes each image/group separately; the colors are not comparable across images.
 
-Click a patch to zoom to its surrounding tissue and highlight its location without opening a dialog. Choose **View patch details** to explicitly inspect its original-resolution crop and surrounding tissue. Without an original, the dialog explicitly identifies the reduced preview fallback.
+Click a patch to make a gentle, animated move to a broad surrounding tissue region and highlight its location without opening a dialog. Choose **View patch details** to explicitly inspect its original-resolution crop and surrounding tissue. Without an original, the dialog explicitly identifies the reduced preview fallback.
 
 To enable original-resolution crops, place an original image inside its case directory and add `source_image_path` (a path relative to that directory) to `case.json`. Its dimensions must match `source_width` and `source_height`. Add `microns_per_pixel_x` and `microns_per_pixel_y` only when physical calibration is known. A scale bar and patch measurements appear only with valid calibration. Image dimensions alone are not a physical calibration.
 
