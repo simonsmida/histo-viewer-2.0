@@ -778,3 +778,19 @@ body {
 .patch-detail-images img { width: 100%; aspect-ratio: 1; object-fit: contain; background: #fafafa; border: 1px solid var(--border-light); }
 .patch-detail-images figcaption { font-size: 12px; margin-top: 5px; color: var(--text-secondary); }
 @media (max-width: 600px) { .image-scale { left: auto; right: 12px; } }
+
+.review-panel { padding-top: 14px; }
+.review-panel h2 { font-size: 15px; margin: 8px 0 16px; }
+.review-panel h3 { font-size: 13px; margin: 20px 0 10px; }
+.prototype-note { color: #805000; background: #fff6df; border-radius: 4px; padding: 7px; font-size: 11px; }
+.review-panel input:not([type=checkbox]), .review-panel textarea { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; font: inherit; font-size: 13px; }
+.review-panel textarea { resize: vertical; }
+.review-panel .form-label { margin-top: 12px; }
+.review-help, #reviewStatus, .review-history-meta { color: var(--text-secondary); font-size: 12px; margin: 10px 0; }
+.review-include { display: flex; align-items: center; gap: 6px; font-size: 12px; margin: 14px 0; }
+.review-examples { list-style: none; font-size: 12px; }
+.review-examples li { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: 6px 0; }
+.review-history-item { padding: 10px; border: 1px solid var(--border); border-radius: 5px; margin-bottom: 10px; font-size: 12px; overflow-wrap: anywhere; }
+.review-history-item p { margin: 6px 0; white-space: pre-wrap; }
+.patch-review-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px; margin: 12px 0; }
+#annotationSaveStatus { font-size: 11px; color: var(--text-secondary); }

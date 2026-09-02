@@ -106,3 +106,11 @@ To enable original-resolution crops, place an original image inside its case dir
 The local demonstration has matching original TIFFs for Samples 2 and 3. Sample 2's ImageJ TIFF records micrometre units and 1.371211 pixels per micrometre (0.7292823643 µm/pixel); Sample 3 has no usable physical calibration. Sample 1 currently uses the preview fallback. These files and case metadata remain under ignored `data/` and must be transferred separately for any deployment.
 
 Future research work: evaluate feature consistency beyond top-ranked patches, including intermediate/random active examples and controls from held-out slides. This is not part of the current demonstration UI.
+
+## Experimental expert review
+
+The `feature/pathologist-review` branch adds a Review tab for testing before deployment. Select supporting or contradicting examples from a patch's inspection dialog, then record a reviewer label, assessment, interpretation, and notes. Optionally include the current image annotations. Saving creates a new timestamped JSON snapshot; earlier reviews are preserved. Each saved record can be exported from the review history.
+
+Review examples and included annotation regions use original-image pixel coordinates. The app warns before navigating away from unsaved reviews or image annotations. Saving a review snapshots its included regions; saving editable image annotations remains a separate action. Reviewer names are labels, not authenticated identities.
+
+This branch stores reviews in `review-data/reviews/` and editable annotations in `review-data/annotations/`, separate from the demonstration data. Both Git and Docker exclude `review-data`; back it up separately if this prototype is used for real reviews. For Docker testing, mount a writable directory at `/app/review-data`. This feature has not been deployed.

@@ -21,6 +21,7 @@ from .catalog import (
     list_cases,
     list_concepts,
 )
+from .reviews import router as review_router
 from .patches import crop_patch, patch_image_source, physical_pixel_size
 
 
@@ -29,7 +30,8 @@ STATIC_DIR = BASE_DIR / "static"
 
 ANNOTATIONS_DIR.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="Histo Viewer 2.0")
+app = FastAPI(title="Histo Viewer 2.0 — Review prototype")
+app.include_router(review_router)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 

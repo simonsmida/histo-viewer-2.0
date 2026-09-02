@@ -10,7 +10,7 @@ from fastapi import HTTPException
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 CASES_DIR = BASE_DIR / "data" / "cases"
-ANNOTATIONS_DIR = BASE_DIR / "data" / "annotations"
+ANNOTATIONS_DIR = BASE_DIR / "review-data" / "annotations"
 
 
 @dataclass(frozen=True, slots=True)

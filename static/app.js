@@ -93,6 +93,157 @@ const state = {
   visiblePatchCount: PATCH_BATCH_SIZE,
 };
 
+const reviewState = { dirty: false, annotationDirty: false, saving: false, examples: new Map(), inspectedPatch: null, historyToken: 0 };
+const reviewUI = Object.fromEntries(["reviewForm", "reviewerName", "reviewAssessment", "reviewInterpretation", "reviewNotes",
+  "reviewIncludeRegions", "reviewExamples", "reviewSave", "reviewStatus", "reviewHistory", "reviewHeading", "annotationSaveStatus", "patchEvidenceStatus"]
+  .map(id => [id, document.getElementById(id)]));
+
+function markReviewDirty() {
+  reviewState.dirty = true;
+  reviewUI.reviewStatus.textContent = "Unsaved review changes.";
+}
+
+function markAnnotationsDirty() {
+  reviewState.annotationDirty = true;
+  reviewUI.annotationSaveStatus.textContent = "Unsaved changes";
+}
+
+function canChangeSelection(changingCase) {
+  if (reviewState.saving) return false;
+  if (!reviewState.dirty && !(changingCase && reviewState.annotationDirty)) return true;
+  return window.confirm("You have unsaved review or annotation changes. Leave without saving them?");
+}
+
+window.addEventListener("beforeunload", event => {
+  if (reviewState.dirty || reviewState.annotationDirty || reviewState.saving) {
+    event.preventDefault();
+    event.returnValue = "";
+  }
+});
+
+function renderReviewExamples() {
+  reviewUI.reviewExamples.replaceChildren();
+  for (const [index, example] of reviewState.examples) {
+    const li = document.createElement("li");
+    const label = document.createElement("span");
+    label.textContent = `Patch ${example.rank} · ${example.kind === "support" ? "Supports" : "Contradicts"}`;
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "btn btn-sm";
+    remove.textContent = "Remove";
+    remove.addEventListener("click", () => {
+      if (reviewState.saving) return;
+      reviewState.examples.delete(index);
+      markReviewDirty();
+      renderReviewExamples();
+    });
+    li.append(label, remove);
+    reviewUI.reviewExamples.append(li);
+  }
+}
+
+function exportReview(record) {
+  const url = URL.createObjectURL(new Blob([JSON.stringify(record, null, 2)], { type: "application/json" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${record.case_id}-${record.group_id}-review-${record.id}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+async function refreshReviewHistory() {
+  const token = ++reviewState.historyToken;
+  reviewUI.reviewHistory.textContent = "Loading saved reviews…";
+  try {
+    const records = await fetchJson(`/api/cases/${state.currentCase.id}/concepts/${state.currentConcept.id}/reviews`);
+    if (token !== reviewState.historyToken) return;
+    reviewUI.reviewHistory.replaceChildren();
+    if (!records.length) reviewUI.reviewHistory.textContent = "No saved reviews yet.";
+    const assessments = { consistent: "Consistent pattern", mixed: "Mixed patterns", artifact: "Artifact", uncertain: "Unsure" };
+    for (const record of records) {
+      const item = document.createElement("div");
+      item.className = "review-history-item";
+      const title = document.createElement("strong");
+      title.textContent = `${record.reviewer} · ${assessments[record.assessment]}`;
+      const date = document.createElement("p");
+      date.className = "review-history-meta";
+      date.textContent = new Date(record.created_at).toLocaleString();
+      const text = document.createElement("p");
+      text.textContent = record.interpretation;
+      const notes = document.createElement("p");
+      notes.textContent = record.notes;
+      const count = document.createElement("p");
+      count.textContent = `${record.supporting_patches.length} supporting · ${record.contradicting_patches.length} contradicting · ${record.regions.length} regions`;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-sm";
+      button.textContent = "Export review";
+      button.addEventListener("click", () => exportReview(record));
+      item.append(title, date, text, notes, count, button);
+      reviewUI.reviewHistory.append(item);
+    }
+  } catch (error) {
+    if (token === reviewState.historyToken) reviewUI.reviewHistory.textContent = "Could not load saved reviews.";
+  }
+}
+
+function resetReviewForGroup() {
+  reviewUI.reviewAssessment.value = "uncertain";
+  reviewUI.reviewInterpretation.value = "";
+  reviewUI.reviewNotes.value = "";
+  reviewUI.reviewIncludeRegions.checked = true;
+  reviewState.examples.clear();
+  reviewState.inspectedPatch = null;
+  reviewState.dirty = false;
+  reviewUI.reviewStatus.textContent = "No unsaved changes.";
+  reviewUI.reviewHeading.textContent = `${state.currentCase.label} · ${patchGroupLabel(state.currentConcept)}`;
+  renderReviewExamples();
+  refreshReviewHistory();
+}
+
+for (const [id, kind] of [["patchSupports", "support"], ["patchContradicts", "contradict"]]) {
+  document.getElementById(id).addEventListener("click", () => {
+    if (reviewState.saving || !reviewState.inspectedPatch) return;
+    const patch = reviewState.inspectedPatch;
+    reviewState.examples.set(patch.patch_index, { rank: patch.rank, kind });
+    markReviewDirty();
+    renderReviewExamples();
+    reviewUI.patchEvidenceStatus.textContent = kind === "support" ? "Added as supporting example." : "Added as contradicting example.";
+  });
+}
+
+reviewUI.reviewForm.addEventListener("input", markReviewDirty);
+reviewUI.reviewForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  if (reviewState.saving || !state.currentConcept) return;
+  const examples = [...reviewState.examples];
+  const payload = {
+    reviewer: reviewUI.reviewerName.value,
+    assessment: reviewUI.reviewAssessment.value,
+    interpretation: reviewUI.reviewInterpretation.value,
+    notes: reviewUI.reviewNotes.value,
+    supporting_patches: examples.filter(([, p]) => p.kind === "support").map(([index]) => index),
+    contradicting_patches: examples.filter(([, p]) => p.kind === "contradict").map(([index]) => index),
+    annotations: reviewUI.reviewIncludeRegions.checked ? state.annotations : [],
+  };
+  reviewState.saving = true;
+  for (const control of reviewUI.reviewForm.elements) control.disabled = true;
+  reviewUI.reviewStatus.textContent = "Saving review…";
+  try {
+    await fetchJson(`/api/cases/${state.currentCase.id}/concepts/${state.currentConcept.id}/reviews`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+    });
+    reviewState.dirty = false;
+    reviewUI.reviewStatus.textContent = "Review saved. Each save keeps a separate dated record.";
+    await refreshReviewHistory();
+  } catch (error) {
+    reviewUI.reviewStatus.textContent = "Review was not saved. Check your name and annotations, then try again. Your entries are still here.";
+  } finally {
+    reviewState.saving = false;
+    for (const control of reviewUI.reviewForm.elements) control.disabled = false;
+  }
+});
+
 function setNavigationBusy(busy) {
   for (const prefix of ["case", "concept"]) {
     const select = elements[`${prefix}Select`];
@@ -259,6 +410,7 @@ function redrawAnnotations(currentMousePoint = null) {
 }
 
 function addAnnotation(annotation) {
+  markAnnotationsDirty();
   state.annotations.push(annotation);
   renderAnnotationList();
   redrawAnnotations();
@@ -268,6 +420,7 @@ function renameAnnotation(annotationId, nextName) {
   const annotation = state.annotations.find((entry) => entry.id === annotationId);
   if (annotation) {
     annotation.name = nextName;
+    markAnnotationsDirty();
   }
 }
 
@@ -275,12 +428,14 @@ function toggleAnnotation(annotationId) {
   const annotation = state.annotations.find((entry) => entry.id === annotationId);
   if (annotation) {
     annotation.visible = !annotation.visible;
+    markAnnotationsDirty();
   }
   renderAnnotationList();
   redrawAnnotations();
 }
 
 function removeAnnotation(annotationId) {
+  markAnnotationsDirty();
   state.annotations = state.annotations.filter((entry) => entry.id !== annotationId);
   renderAnnotationList();
   redrawAnnotations();
@@ -431,6 +586,8 @@ function updatePhysicalScale() {
 }
 
 async function inspectPatch(patch) {
+  reviewState.inspectedPatch = patch;
+  reviewUI.patchEvidenceStatus.textContent = "";
   const token = ++state.detailRequestToken;
   const base = `/api/cases/${encodeURIComponent(state.currentCase.id)}/concepts/${encodeURIComponent(state.currentConcept.id)}/patches/${patch.rank}`;
   elements.patchDialogTitle.textContent = `${state.currentCase.label} · ${patchGroupLabel(state.currentConcept)} · Patch ${patch.rank}`;
@@ -556,6 +713,8 @@ async function loadAnnotations() {
   }
   state.annotations = await fetchJson(`/api/cases/${encodeURIComponent(state.currentCase.id)}/annotations`);
   state.nextColorIndex = state.annotations.length;
+  reviewState.annotationDirty = false;
+  reviewUI.annotationSaveStatus.textContent = "Saved";
   renderAnnotationList();
   redrawAnnotations();
 }
@@ -569,6 +728,8 @@ async function saveAnnotations() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(state.annotations),
   });
+  reviewState.annotationDirty = false;
+  reviewUI.annotationSaveStatus.textContent = "Saved";
   setStatus("Annotations saved.");
 }
 
@@ -598,6 +759,7 @@ async function loadConcept(conceptId) {
   }
 
   state.currentConcept = concept;
+  resetReviewForGroup();
 
   drawPatternHighlights();
 
@@ -798,6 +960,7 @@ elements.annotImportInput.addEventListener("change", async (event) => {
       throw new Error("Expected a JSON array.");
     }
     state.annotations = imported;
+    markAnnotationsDirty();
     state.nextColorIndex = state.annotations.length;
     renderAnnotationList();
     redrawAnnotations();
@@ -811,6 +974,7 @@ elements.annotImportInput.addEventListener("change", async (event) => {
 });
 
 elements.annotToggleAll.addEventListener("click", () => {
+  markAnnotationsDirty();
   const allVisible = state.annotations.every((annotation) => annotation.visible);
   state.annotations.forEach((annotation) => {
     annotation.visible = !allVisible;
@@ -820,6 +984,10 @@ elements.annotToggleAll.addEventListener("click", () => {
 });
 
 elements.caseSelect.addEventListener("change", async () => {
+  if (!canChangeSelection(true)) {
+    elements.caseSelect.value = state.currentCase.id;
+    return;
+  }
   setNavigationBusy(true);
   try {
     clearPatternHighlights();
@@ -835,6 +1003,10 @@ elements.caseSelect.addEventListener("change", async () => {
 });
 
 elements.conceptSelect.addEventListener("change", async () => {
+  if (!canChangeSelection(false)) {
+    elements.conceptSelect.value = state.currentConcept.id;
+    return;
+  }
   setNavigationBusy(true);
   try {
     await loadConcept(elements.conceptSelect.value);

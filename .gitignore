@@ -1,5 +1,5 @@
 # Runtime data is synced separately from application code.
-/data/
+/data
 
 # Local Python environments and caches.
 .venv/
@@ -18,3 +18,6 @@ htmlcov/
 .DS_Store
 ._*
 *.log
+
+# Isolated experimental review records and annotations.
+/review-data/

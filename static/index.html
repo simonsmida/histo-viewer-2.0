@@ -96,6 +96,7 @@
       <div class="panel-tab-bar">
         <button class="panel-tab active" data-tab="patches">Patches</button>
         <button class="panel-tab" data-tab="annotations">Annotations</button>
+        <button class="panel-tab" data-tab="review">Review</button>
       </div>
 
       <div class="panel-section active" data-tab="patches">
@@ -133,9 +134,39 @@
         </div>
       </div>
 
+      <div class="panel-section" data-tab="review">
+        <div class="panel-section-body review-panel">
+          <p class="prototype-note">Review prototype · for testing</p>
+          <h2 id="reviewHeading">Review this patch group</h2>
+          <form id="reviewForm">
+            <label class="form-label" for="reviewerName">Your name or initials</label>
+            <input id="reviewerName" maxlength="120" required autocomplete="off" />
+            <label class="form-label" for="reviewAssessment">Do these patches share a recognizable pattern?</label>
+            <select id="reviewAssessment" class="styled-select">
+              <option value="uncertain">Unsure</option>
+              <option value="consistent">Yes, a consistent pattern</option>
+              <option value="mixed">A mixture of patterns</option>
+              <option value="artifact">Mostly an artifact</option>
+            </select>
+            <label class="form-label" for="reviewInterpretation">What do you see?</label>
+            <textarea id="reviewInterpretation" rows="3" maxlength="2000" placeholder="Describe the tissue or pattern in your own words"></textarea>
+            <label class="form-label" for="reviewNotes">Additional notes</label>
+            <textarea id="reviewNotes" rows="2" maxlength="5000"></textarea>
+            <p class="review-help">Open a patch to add it as a supporting or contradicting example.</p>
+            <ul id="reviewExamples" class="review-examples"></ul>
+            <label class="review-include"><input id="reviewIncludeRegions" type="checkbox" checked /> Include current image annotations</label>
+            <button class="btn" id="reviewSave" type="submit">Save review</button>
+            <p id="reviewStatus" role="status">No unsaved changes.</p>
+          </form>
+          <h3>Saved reviews for this group</h3>
+          <div id="reviewHistory"></div>
+        </div>
+      </div>
+
       <div class="panel-section" data-tab="annotations">
         <div class="panel-section-header">
           <span>Annotations</span>
+          <span id="annotationSaveStatus" role="status">Saved</span>
           <span id="annotCount">0</span>
         </div>
         <div class="annot-toolbar">
@@ -177,6 +208,12 @@
       <figure><img id="patchContextImage" alt="Surrounding tissue with the selected patch outlined in blue" /><figcaption>Surrounding tissue · selected patch outlined</figcaption></figure>
     </div>
     <p id="patchScaleText"></p>
+    <div class="patch-review-actions">
+      <span>Add to review:</span>
+      <button class="btn btn-sm" id="patchSupports" type="button">Supports the pattern</button>
+      <button class="btn btn-sm" id="patchContradicts" type="button">Contradicts the pattern</button>
+      <span id="patchEvidenceStatus" role="status"></span>
+    </div>
     <button class="btn" id="patchShowLocation" type="button">View location in image</button>
   </dialog>
   <script type="module" src="/static/app.js"></script>
