@@ -15,15 +15,8 @@ import numpy as np
 from matplotlib import colormaps
 from PIL import Image, ImageFilter
 
-# python3 scripts/sync_shared_sae_neurons.py \
-#   --sae-type batchtopk_latent2048_l048_seed0 \
-#   --neurons 1 2 3
-
-
 ROOT = Path(__file__).resolve().parents[1]
 CASES_DIR = ROOT / "data" / "cases"
-SOURCE_ROOT = Path("/Users/kailash/Desktop/PhD/Research/FoundationModels/CONCH/mego-ctc")
-SOURCE_VIS_DIR = SOURCE_ROOT / "visualizations" / "by_image"
 
 DEFAULT_SAE_TYPE = "batchtopk_latent2048_l048_seed0"
 DEFAULT_NEURONS = [31, 44, 51, 107, 152, 162, 167, 207, 252, 444, 551, 580, 751, 1151, 1575]
@@ -113,6 +106,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Sync one shared SAE neuron list into every histology case."
     )
+    parser.add_argument("--source-root", type=Path, required=True, help="mego-ctc directory containing visualizations/ and outputs/.")
     parser.add_argument("--sae-type", default=DEFAULT_SAE_TYPE)
     parser.add_argument("--neurons", nargs="+", type=int, default=DEFAULT_NEURONS)
     return parser.parse_args()
@@ -306,16 +300,16 @@ def source_slug_for_case(case_id: str, case_payload: dict) -> str:
         ) from exc
 
 
-def load_source_bundle(source_slug: str, sae_type: str) -> tuple[dict, np.ndarray, list[PatchRecord], np.ndarray]:
-    image_metadata = load_json(SOURCE_VIS_DIR / source_slug / "image_metadata.json")
+def load_source_bundle(source_root: Path, source_slug: str, sae_type: str) -> tuple[dict, np.ndarray, list[PatchRecord], np.ndarray]:
+    image_metadata = load_json(source_root / "visualizations" / "by_image" / source_slug / "image_metadata.json")
     patch_key = patch_slug(
         patch_size=int(image_metadata["patch_size"]),
         stride=int(image_metadata["stride"]),
         min_tissue_fraction=float(image_metadata["min_tissue_fraction"]),
         white_threshold=float(image_metadata["white_threshold"]),
     )
-    embedding_cache = SOURCE_ROOT / "outputs" / "conch_embeddings" / source_slug / patch_key / "conch_patch_embeddings.pt"
-    activation_cache = SOURCE_ROOT / "outputs" / "sae_activations" / sae_type / source_slug / patch_key / "all_latent_activations.pt"
+    embedding_cache = source_root / "outputs" / "conch_embeddings" / source_slug / patch_key / "conch_patch_embeddings.pt"
+    activation_cache = source_root / "outputs" / "sae_activations" / sae_type / source_slug / patch_key / "all_latent_activations.pt"
 
     if not embedding_cache.exists():
         raise FileNotFoundError(f"Missing embedding cache: {embedding_cache}")
@@ -340,12 +334,12 @@ def concept_id_for(neuron: int) -> str:
     return f"concept-{neuron:04d}"
 
 
-def sync_case(case_dir: Path, sae_type: str, neurons: list[int]) -> None:
+def sync_case(case_dir: Path, source_root: Path, sae_type: str, neurons: list[int]) -> None:
     case_path = case_dir / "case.json"
     case_payload = load_json(case_path)
     case_id = str(case_payload["id"])
     source_slug = source_slug_for_case(case_id, case_payload)
-    image_metadata, image_array, records, activations = load_source_bundle(source_slug, sae_type)
+    image_metadata, image_array, records, activations = load_source_bundle(source_root, source_slug, sae_type)
 
     slide_width, slide_height = Image.open(case_dir / "slide.png").size
     patch_size = int(image_metadata["patch_size"])
@@ -437,7 +431,7 @@ def main() -> None:
     args = parse_args()
     neurons = sorted(dict.fromkeys(args.neurons))
     for case_dir in sorted(path for path in CASES_DIR.iterdir() if path.is_dir()):
-        sync_case(case_dir=case_dir, sae_type=args.sae_type, neurons=neurons)
+        sync_case(case_dir=case_dir, source_root=args.source_root, sae_type=args.sae_type, neurons=neurons)
 
 
 if __name__ == "__main__":

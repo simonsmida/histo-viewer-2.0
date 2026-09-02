@@ -480,24 +480,6 @@ body {
   display: none;
 }
 
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 3px 0;
-  font-size: 12px;
-}
-
-.info-row .label {
-  color: var(--text-muted);
-}
-
-.info-row .value {
-  color: var(--text-primary);
-  font-weight: 500;
-  text-align: right;
-}
-
 .empty-state {
   display: flex;
   flex-direction: column;

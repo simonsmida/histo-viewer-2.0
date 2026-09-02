@@ -1,5 +1,20 @@
+# Runtime data is synced separately from application code.
+/data/
+
+# Local Python environments and caches.
+.venv/
+venv/
 __pycache__/
+*.py[cod]
 .pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local configuration and operating-system files.
+.env
+.env.*
+!.env.example
 .DS_Store
-data/annotations/*.json
-data/cases/*/concepts/*/patch_thumbnails/
+._*
+*.log

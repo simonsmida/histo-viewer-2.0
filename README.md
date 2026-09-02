@@ -1,89 +1,96 @@
 # Histo Viewer 2.0
 
-NOTE: Histology viewer revibe-coded based on Patrik's originally vibe-coded [Heatmap.Viewer](https://github.com/0Kozlik0/Heatmap.Viewer) (thank you!).
+A FastAPI/OpenSeadragon viewer for histology images, SAE concept overlays, top-activating patches, and annotations. Based on [Heatmap.Viewer](https://github.com/0Kozlik0/Heatmap.Viewer).
 
+## Code and data
 
-## What Is Included
+Git contains application code, preprocessing scripts, and setup instructions. Runtime data is stored separately in `data/` and is ignored by Git and Docker builds.
 
-- 2 local histology images packaged inside the repo
-- shared SAE neuron overlays synced across every image
-- heatmap overlay toggle with opacity control
-- top activating patch browser for each concept
-- annotation drawing, save, export, and import
-- lightweight FastAPI backend with raster Deep Zoom tiles
+```text
+app/          FastAPI routes, case discovery, and image loading for thumbnails
+static/       HTML, JavaScript, and CSS
+scripts/      Overlay, tile, and thumbnail preprocessing
+tests/        Preprocessing regression tests
+data/         Local runtime data (not committed)
+  cases/      Case JSON, source images, overlays, CSVs, DZI descriptors and tiles
+  annotations/  Saved user annotations
+```
 
-## Run Locally
+## Run locally
+
+Use Python 3.11 or later. Run commands from the repository root:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-python run.py
+python -m pip install -r requirements.txt
 ```
 
-Open [http://localhost:8000](http://localhost:8000)
+Populate `data/` from the production server before opening the viewer. On a Mac connected to FIT VPN, with the deployment SSH key available:
 
-## Run With Docker
+```bash
+mkdir -p data
+rsync -a --partial --no-owner --no-group --timeout=180 \
+  --exclude='*_files/**/**_files/' \
+  --exclude='*_files/**/*.dzi' \
+  -e "ssh -o IdentitiesOnly=yes -i ~/.ssh/id_ed25519_histo -o ServerAliveInterval=15 -o ServerAliveCountMax=3" \
+  root@histoviewer.ksi.in.fit.cvut.cz:/opt/histo-viewer-2.0/data/ \
+  ./data/
+```
+
+This updates local data, including annotations. It excludes redundant pyramids generated inside other tile pyramids. On macOS, if the built-in openrsync stalls, install Homebrew rsync and use `/opt/homebrew/bin/rsync` instead.
+
+```bash
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+Open http://localhost:8000. `python run.py` is an alternative that listens on all network interfaces, port 8000.
+
+## Run with Docker
+
+Data is mounted at runtime, not baked into the image:
 
 ```bash
 docker build -t histo-viewer-2 .
-docker run --rm -p 8000:8000 histo-viewer-2
+docker run --rm -p 8000:8000 -v "$PWD/data:/app/data" histo-viewer-2
 ```
 
-## Project Layout
+The data mount must be writable to save annotations.
 
-```text
-histo-viewer-2.0/
-|- app/
-|  |- catalog.py        # local case/concept discovery
-|  |- main.py           # FastAPI routes
-|  `- tiles.py          # raster Deep Zoom tile rendering
-|- data/
-|  |- cases/            # packaged slides, overlays, and patch CSVs
-|  `- annotations/      # saved annotations per histology image
-|- static/
-|  |- app.js            # frontend logic
-|  |- index.html        # UI shell
-|  `- styles.css        # viewer styles
-|- Dockerfile
-|- requirements.txt
-`- run.py
-```
+## Preprocessing
 
-## Syncing Shared SAE Neurons
-
-Use the sync script whenever you want the same SAE neurons to be available for every case:
+Ordinary code updates do not require regenerating data. After adding source images or changing overlays, generate their Deep Zoom pyramids:
 
 ```bash
-python3 scripts/sync_shared_sae_neurons.py \
+python scripts/precompute_tiles.py --inputdata/cases --tile-size 256 --overlap 0 --jpeg-quality 85
+python scripts/precompute_patch_thumbnails.py --size 128
+```
+
+Tile preprocessing skips `*_files` and `patch_thumbnails` directories. Existing pyramids are skipped unless `--force` is supplied; use it after changing source images. Use `--force` for thumbnails after changing slides or patch CSVs. The app serves precomputed tiles and renders missing patch thumbnails on demand.
+
+To rebuild shared SAE overlays and patch CSVs, supply the research dataset directory explicitly:
+
+```bash
+python scripts/sync_shared_sae_neurons.py \
+  --source-root /path/to/mego-ctc \
   --sae-type batchtopk_latent2048_l048_seed0 \
   --neurons 31 44 51 107 152 162 167 207 252 444 551 580 751 1151 1575
 ```
 
-The script:
+The source directory must contain `visualizations/by_image/`, `outputs/conch_embeddings/`, and `outputs/sae_activations/`. The image paths in its metadata must be accessible. This script rebuilds overlays and CSVs, updates case metadata, and removes concepts outside the requested neuron list. Regenerate tiles and thumbnails with `--force` afterward.
 
-- rebuilds `overlay.png` as the clean interpolated colormap heatmap plus `patches.csv` for every listed neuron in every case
-- updates each `case.json` so all cases expose the same neuron list
-- removes old concept folders that are no longer in the shared selection
+To add an image, create `data/cases/<case-id>/slide.png` and a `case.json` following an existing case, including `source_image_slug`, then generate its concepts and tiles.
 
-Each case also stores a `source_image_slug` in `case.json`. If you add a new case later, set that field to the matching source image slug from `Research/FoundationModels/CONCH/mego-ctc/visualizations/by_image/`, then rerun the script.
-
-## Performance Precomputes
-
-The repository already stores Deep Zoom tiles for slides and concept overlays. After pulling fresh data on the server, you can also precompute the patch thumbnails used by the right-side patch browser:
+## Verification
 
 ```bash
-python3 scripts/precompute_patch_thumbnails.py --size 128
+python -m unittest discover -s tests
 ```
 
-The app can generate missing thumbnails on demand, but precomputing them makes the first concept selection smoother.
+## Deployment and the one-time data migration
 
-## Adding More Images Later
+Local changes are tested, committed, pushed, then fast-forwarded into the server checkout at `/opt/histo-viewer-2.0`. Restart `histo-viewer` after application changes. Script-only changes do not need a service restart. The server needs GitHub credentials for `git pull`; SSH access alone does not provide them.
 
-1. Create a new folder under `data/cases/`.
-2. Add a `slide.png` preview image.
-3. Create a `case.json` matching the existing examples in `data/cases/case-01/` and `data/cases/case-02/`.
-4. Set `source_image_slug` in that `case.json`.
-5. Run `scripts/sync_shared_sae_neurons.py` to populate the shared neuron overlays.
+**Before first deploying the commit that removes data from Git tracking:** back up the complete server `data/` directory outside the checkout and verify the backup. Stop the service for this migration to avoid losing new annotations. Pull the code, restore the data into `data/`, verify it, and restart the service. Git may delete formerly tracked data during this first pull; `.gitignore` does not prevent that. Do not delete the backup until the viewer has been verified.
 
-The backend auto-discovers every case folder that contains a valid `case.json`.
+Subsequent deployments transport code through Git and data through rsync. Never commit `.venv/`, runtime data, or credentials. Removing data from the current Git index does not shrink existing Git history; rewriting history is a separate operation.

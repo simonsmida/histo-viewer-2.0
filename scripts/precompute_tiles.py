@@ -102,17 +102,6 @@ def precompute_dzi(
     print(f"  wrote {output_files_dir}")
 
 
-def looks_like_base_image(path: Path) -> bool:
-    name = path.name.lower()
-    if not path.is_file():
-        return False
-    if path.suffix.lower() not in {".png", ".jpg", ".jpeg", ".tif", ".tiff"}:
-        return False
-    if "overlay" in name or "heatmap" in name:
-        return False
-    return True
-
-
 def looks_like_overlay(path: Path) -> bool:
     name = path.name.lower()
     if not path.is_file():
@@ -128,6 +117,7 @@ def process_tree(
     tile_size: int,
     overlap: int,
     jpeg_quality: int,
+    force: bool = False,
 ) -> None:
     image_paths = []
     for directory, subdirs, filenames in os.walk(input_root):
@@ -154,7 +144,7 @@ def process_tree(
         dzi_path = image_path.with_suffix(".dzi")
         files_dir = image_path.with_suffix("").parent / f"{image_path.stem}_files"
 
-        if dzi_path.exists() and files_dir.exists():
+        if not force and dzi_path.exists() and files_dir.exists():
             print(f"[skip] {image_path} already has tiles")
             continue
 
@@ -194,6 +184,9 @@ def main() -> None:
 
     if input_path.is_file():
         stem = input_path.with_suffix("")
+        if not args.force and input_path.with_suffix(".dzi").exists() and (stem.parent / f"{stem.name}_files").is_dir():
+            print(f"[skip] {input_path} already has tiles")
+            return
         fmt = "png" if looks_like_overlay(input_path) else "jpg"
 
         precompute_dzi(
@@ -208,6 +201,7 @@ def main() -> None:
     else:
         process_tree(
             input_path,
+            force=args.force,
             tile_size=args.tile_size,
             overlap=args.overlap,
             jpeg_quality=args.jpeg_quality,

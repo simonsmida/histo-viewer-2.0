@@ -266,12 +266,5 @@ def concept_detail(case_id: str, concept_id: str) -> dict:
     )
 
 
-def clear_catalog_caches() -> None:
-    load_cases.cache_clear()
-    _load_patches_cached.cache_clear()
-    _patches_by_rank.cache_clear()
-    _concept_detail_cached.cache_clear()
-
-
 def annotation_path(case_id: str) -> Path:
     return ANNOTATIONS_DIR / f"{case_id}.annotations.json"
