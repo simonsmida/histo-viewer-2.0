@@ -203,8 +203,9 @@ body {
 
 .vc-label {
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
+  line-height: 1.2;
 }
 
 .blend-range {
@@ -243,7 +244,7 @@ body {
   border-top: 1px solid var(--border);
   background: var(--bg-surface);
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
 }
@@ -319,7 +320,7 @@ body {
   justify-content: space-between;
   padding: 14px 16px 8px;
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.6px;
   text-transform: uppercase;
@@ -749,11 +750,11 @@ body {
   border-radius: var(--radius-sm);
   background: rgba(255,255,255,.95);
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 12px;
   box-shadow: var(--shadow-sm);
 }
-.legend-scale { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
-.legend-gradient { width: 84px; height: 8px; border-radius: 4px; background: linear-gradient(to right, #30123b, #466be3, #28bceb, #32f298, #a4fc3c, #eecf3a, #fb8022, #d02f05, #7a0403); }
+.legend-scale { display: flex; align-items: center; gap: 7px; margin: 5px 0; }
+.legend-gradient { width: 96px; height: 9px; border-radius: 4px; background: linear-gradient(to right, #30123b, #466be3, #28bceb, #32f298, #a4fc3c, #eecf3a, #fb8022, #d02f05, #7a0403); }
 .image-scale { position: absolute; bottom: 42px; left: 238px; z-index: 50; background: rgba(255,255,255,.95); padding: 8px; border-radius: 4px; font-size: 11px; }
 .image-scale span { display: block; }
 #scaleLine { border: solid var(--text-primary); border-width: 0 2px 2px; height: 6px; margin-bottom: 4px; }
