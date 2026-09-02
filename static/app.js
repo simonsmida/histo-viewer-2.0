@@ -87,6 +87,7 @@ const state = {
   freehandPoints: [],
   nextColorIndex: 0,
   selectedPatchKey: null,
+  selectedPatch: null,
   selectedPatchOverlay: null,
   heatmapItem: null,
   overlayRequestToken: 0,
@@ -435,6 +436,14 @@ function updatePhysicalScale() {
   elements.imageScale.hidden = false;
 }
 
+function focusPatch(patch) {
+  const rect = new OpenSeadragon.Rect(patch.viewer_x / state.currentCase.viewer_width,
+    patch.viewer_y / state.currentCase.viewer_width, patch.viewer_w / state.currentCase.viewer_width,
+    patch.viewer_h / state.currentCase.viewer_width);
+  const margin = rect.width * 6;
+  viewer.viewport.fitBounds(new OpenSeadragon.Rect(rect.x - margin, rect.y - margin, rect.width + margin * 2, rect.height + margin * 2));
+}
+
 async function inspectPatch(patch) {
   const token = ++state.detailRequestToken;
   const base = `/api/cases/${encodeURIComponent(state.currentCase.id)}/concepts/${encodeURIComponent(state.currentConcept.id)}/patches/${patch.rank}`;
@@ -443,11 +452,6 @@ async function inspectPatch(patch) {
   elements.patchScaleText.textContent = "";
   elements.patchDetailImages.hidden = true;
   elements.patchDialog.showModal();
-  const rect = new OpenSeadragon.Rect(patch.viewer_x / state.currentCase.viewer_width,
-    patch.viewer_y / state.currentCase.viewer_width, patch.viewer_w / state.currentCase.viewer_width,
-    patch.viewer_h / state.currentCase.viewer_width);
-  const margin = rect.width * 2;
-  viewer.viewport.fitBounds(new OpenSeadragon.Rect(rect.x - margin, rect.y - margin, rect.width + margin * 2, rect.height + margin * 2));
   try {
     const detail = await fetchJson(`${base}/detail`);
     if (token !== state.detailRequestToken || !elements.patchDialog.open) return;
@@ -477,6 +481,8 @@ for (const id of ["patchDialogClose", "patchShowLocation"]) {
 elements.patchDialog.addEventListener("close", () => { state.detailRequestToken += 1; });
 
 function removeSelectedPatchOverlay() {
+  state.selectedPatch = null;
+  document.getElementById("selectedPatchActions").hidden = true;
   if (state.selectedPatchOverlay) {
     viewer.removeOverlay(state.selectedPatchOverlay);
     state.selectedPatchOverlay = null;
@@ -495,6 +501,9 @@ function applySelectedPatchOverlay(patch) {
       <rect class="selected-patch-stroke-front" x="2.5" y="2.5" width="95" height="95" rx="1.5" ry="1.5"></rect>
     </svg>
   `;
+  state.selectedPatch = patch;
+  document.getElementById("selectedPatchActions").hidden = false;
+  document.getElementById("selectedPatchLabel").textContent = `Patch ${patch.rank} selected`;
   state.selectedPatchOverlay = overlay;
   viewer.addOverlay({
     element: overlay,
@@ -506,6 +515,10 @@ function applySelectedPatchOverlay(patch) {
     ),
   });
 }
+
+document.getElementById("inspectSelectedPatch").addEventListener("click", () => {
+  if (state.selectedPatch) inspectPatch(state.selectedPatch);
+});
 
 function updateActivePatchCard() {
   elements.patchGrid.querySelectorAll(".patch-card").forEach((card) => {
@@ -537,13 +550,13 @@ function renderPatchGrid(reset = true) {
     card.type = "button";
     card.className = "patch-card";
     card.dataset.patchKey = patchKey;
-    card.setAttribute("aria-label", `Inspect patch ${patch.rank}`);
+    card.setAttribute("aria-label", `Show patch ${patch.rank} in image`);
     card.innerHTML = `<img class="patch-thumb" src="${patch.thumbnail_url}" loading="lazy" decoding="async" alt="Patch #${patch.rank}" />`;
     card.addEventListener("click", () => {
       state.selectedPatchKey = patchKey;
       applySelectedPatchOverlay(patch);
       updateActivePatchCard();
-      inspectPatch(patch);
+      focusPatch(patch);
     });
     fragment.appendChild(card);
   }

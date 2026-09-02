@@ -120,6 +120,10 @@
             <p class="browser-hint">Patches grouped by a shared image pattern detected by the model.</p>
           </div>
 
+          <div id="selectedPatchActions" class="selected-patch-actions" hidden>
+            <span id="selectedPatchLabel" role="status"></span>
+            <button id="inspectSelectedPatch" class="btn btn-sm" type="button">View patch details</button>
+          </div>
           <div class="patch-grid-wrap" id="patchGridWrap">
             <div class="patch-grid" id="patchGrid"></div>
             <button class="btn btn-sm patch-more" id="patchMore" type="button" hidden>Show more</button>

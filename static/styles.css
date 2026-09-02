@@ -768,3 +768,5 @@ body {
 .patch-detail-images img { width: 100%; aspect-ratio: 1; object-fit: contain; background: #fafafa; border: 1px solid var(--border-light); }
 .patch-detail-images figcaption { font-size: 12px; margin-top: 5px; color: var(--text-secondary); }
 @media (max-width: 600px) { .image-scale { left: auto; right: 12px; } }
+
+.selected-patch-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 16px 12px; font-size: 12px; color: var(--text-secondary); }
