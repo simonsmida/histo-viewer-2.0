@@ -770,3 +770,5 @@ body {
 @media (max-width: 600px) { .image-scale { left: auto; right: 12px; } }
 
 .selected-patch-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 16px 12px; font-size: 12px; color: var(--text-secondary); }
+
+.selected-patch-actions[hidden] { display: none; }
