@@ -740,15 +740,6 @@ body {
   }
 }
 
-/* Pattern highlights use exact patch footprints over the original tissue. */
-#patternCanvas {
-  position: absolute;
-  inset: 0 0 28px;
-  width: 100%;
-  height: calc(100% - 28px);
-  pointer-events: none;
-  z-index: 20;
-}
 .pattern-legend {
   position: absolute;
   left: 12px;
@@ -762,8 +753,7 @@ body {
   box-shadow: var(--shadow-sm);
 }
 .legend-scale { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
-.legend-gradient { width: 84px; height: 8px; border-radius: 4px; background: linear-gradient(to right, rgb(255,230,120), rgb(194,24,48)); }
-.pattern-legend small { font-size: 10px; color: var(--text-muted); }
+.legend-gradient { width: 84px; height: 8px; border-radius: 4px; background: linear-gradient(to right, #30123b, #466be3, #28bceb, #32f298, #a4fc3c, #eecf3a, #fb8022, #d02f05, #7a0403); }
 .image-scale { position: absolute; bottom: 42px; left: 238px; z-index: 50; background: rgba(255,255,255,.95); padding: 8px; border-radius: 4px; font-size: 11px; }
 .image-scale span { display: block; }
 #scaleLine { border: solid var(--text-primary); border-width: 0 2px 2px; height: 6px; margin-bottom: 4px; }

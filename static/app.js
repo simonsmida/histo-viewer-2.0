@@ -33,7 +33,6 @@ const viewer = OpenSeadragon({
 
 const elements = {
   annotCanvas: document.getElementById("annotCanvas"),
-  patternCanvas: document.getElementById("patternCanvas"),
   patternLegend: document.getElementById("patternLegend"),
   imageScale: document.getElementById("imageScale"),
   scaleLine: document.getElementById("scaleLine"),
@@ -89,6 +88,8 @@ const state = {
   nextColorIndex: 0,
   selectedPatchKey: null,
   selectedPatchOverlay: null,
+  heatmapItem: null,
+  overlayRequestToken: 0,
   detailRequestToken: 0,
   visiblePatchCount: PATCH_BATCH_SIZE,
 };
@@ -138,9 +139,6 @@ function resizeCanvas() {
   const coordHeight = elements.coordBar.offsetHeight || 28;
   elements.annotCanvas.width = rect.width;
   elements.annotCanvas.height = rect.height - coordHeight;
-  elements.patternCanvas.width = elements.annotCanvas.width;
-  elements.patternCanvas.height = elements.annotCanvas.height;
-  drawPatternHighlights();
 }
 
 function canvasToImage(canvasX, canvasY) {
@@ -384,35 +382,42 @@ function renderAnnotationList() {
   });
 }
 
-function clearPatternHighlights() {
-  const canvas = elements.patternCanvas;
-  canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+function removeHeatmapOverlay() {
+  state.overlayRequestToken += 1;
+  if (state.heatmapItem && viewer.world.getIndexOfItem(state.heatmapItem) >= 0) {
+    viewer.world.removeItem(state.heatmapItem);
+  }
+  state.heatmapItem = null;
   elements.patternLegend.hidden = true;
 }
 
-function drawPatternHighlights() {
-  clearPatternHighlights();
-  if (!viewer.isOpen() || !state.currentCase || !state.currentConcept) return;
-  const amount = Number(elements.blendSlider.value) / 100;
-  const patches = state.currentConcept.patches;
-  if (!amount || !patches.length) return;
-  elements.patternLegend.hidden = false;
-  const canvas = elements.patternCanvas;
-  const ctx = canvas.getContext("2d");
-  const maximum = state.currentConcept.max_score;
-  if (!(maximum > 0)) return;
-  // Low scores draw first, so overlapping patch footprints show the strongest response.
-  for (let i = patches.length - 1; i >= 0; i--) {
-    const patch = patches[i];
-    const from = imageToCanvas(patch.viewer_x, patch.viewer_y);
-    const to = imageToCanvas(patch.viewer_x + patch.viewer_w, patch.viewer_y + patch.viewer_h);
-    if (!from || !to || to.x < 0 || to.y < 0 || from.x > canvas.width || from.y > canvas.height) continue;
-    const strength = Math.max(0, Math.min(1, patch.score / maximum));
-    ctx.fillStyle = `rgb(${Math.round(255 - 61 * strength)}, ${Math.round(230 - 206 * strength)}, ${Math.round(120 - 72 * strength)})`;
-    ctx.fillRect(from.x, from.y, to.x - from.x, to.y - from.y);
-  }
-  // Apply opacity once to the whole layer, avoiding darker overlaps.
-  canvas.style.opacity = amount * 0.65;
+function updateHeatmapOpacity() {
+  const opacity = Number(elements.blendSlider.value) / 100;
+  if (state.heatmapItem) state.heatmapItem.setOpacity(opacity);
+  elements.patternLegend.hidden = !state.heatmapItem || opacity === 0;
+}
+
+function applyHeatmapOverlay() {
+  removeHeatmapOverlay();
+  if (!viewer.isOpen() || !state.currentConcept?.patches.length) return;
+  const requestToken = state.overlayRequestToken;
+  // Both layers share OpenSeadragon's viewport and render cycle.
+  viewer.addTiledImage({
+    tileSource: state.currentConcept.overlay_dzi_url,
+    opacity: Number(elements.blendSlider.value) / 100,
+    x: 0, y: 0, width: 1,
+    success: ({ item }) => {
+      if (requestToken !== state.overlayRequestToken) {
+        viewer.world.removeItem(item);
+        return;
+      }
+      state.heatmapItem = item;
+      updateHeatmapOpacity();
+    },
+    error: () => {
+      if (requestToken === state.overlayRequestToken) setStatus("Could not load the heatmap. Select the group to retry.", true);
+    },
+  });
 }
 
 function updatePhysicalScale() {
@@ -448,6 +453,8 @@ async function inspectPatch(patch) {
     if (token !== state.detailRequestToken || !elements.patchDialog.open) return;
     elements.patchDetailImage.src = `${base}/crop.png?rev=${detail.image_revision}`;
     elements.patchContextImage.src = `${base}/crop.png?context=5&rev=${detail.image_revision}`;
+    await Promise.all([elements.patchDetailImage.decode(), elements.patchContextImage.decode()]);
+    if (token !== state.detailRequestToken || !elements.patchDialog.open) return;
     elements.patchDetailStatus.textContent = detail.original_available
       ? `Original-resolution tissue crop · ${detail.crop_width} × ${detail.crop_height} pixels`
       : `Preview crop · ${detail.crop_width} × ${detail.crop_height} pixels. Original-resolution image is not available for this sample.`;
@@ -456,7 +463,11 @@ async function inspectPatch(patch) {
       : "Physical scale is unavailable for this image. Images are enlarged for inspection.";
     elements.patchDetailImages.hidden = false;
   } catch (error) {
-    if (token === state.detailRequestToken) elements.patchDetailStatus.textContent = "Could not load this patch. Close and try again.";
+    console.error("Patch inspection failed", base, error);
+    if (token === state.detailRequestToken) {
+      elements.patchDetailImages.hidden = true;
+      elements.patchDetailStatus.textContent = "The tissue images could not be loaded. Please reload the viewer and try again.";
+    }
   }
 }
 
@@ -599,7 +610,7 @@ async function loadConcept(conceptId) {
 
   state.currentConcept = concept;
 
-  drawPatternHighlights();
+  applyHeatmapOverlay();
 
   renderPatchGrid(true);
   activateTab("patches");
@@ -609,6 +620,7 @@ async function loadConcept(conceptId) {
 
 async function loadCase(caseId) {
   state.conceptRequestToken += 1;
+  removeHeatmapOverlay();
   state.currentConcept = null;
   state.selectedPatchKey = null;
   elements.patchGrid.innerHTML = "";
@@ -822,7 +834,7 @@ elements.annotToggleAll.addEventListener("click", () => {
 elements.caseSelect.addEventListener("change", async () => {
   setNavigationBusy(true);
   try {
-    clearPatternHighlights();
+    removeHeatmapOverlay();
     removeSelectedPatchOverlay();
     await loadCase(elements.caseSelect.value);
     await populateConcepts(elements.caseSelect.value);
@@ -861,7 +873,7 @@ elements.blendSlider.addEventListener("input", () => {
   elements.blendSlider.setAttribute("aria-valuetext", value === 0
     ? "Original histology image"
     : value === 100 ? "Similar patches fully highlighted" : `Similar patches overlay at ${value} percent`);
-  drawPatternHighlights();
+  updateHeatmapOpacity();
 });
 
 document.querySelectorAll(".panel-tab").forEach((button) => {
@@ -891,14 +903,13 @@ viewer.addHandler("open", () => {
   resizeCanvas();
   redrawAnnotations();
   updateStatusZoom();
-  drawPatternHighlights();
+  applyHeatmapOverlay();
   updatePhysicalScale();
 });
 
 viewer.addHandler("animation", () => {
   redrawAnnotations();
   updateStatusZoom();
-  drawPatternHighlights();
   updatePhysicalScale();
 });
 
