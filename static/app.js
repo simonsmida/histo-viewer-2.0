@@ -148,8 +148,8 @@ function canvasToImage(canvasX, canvasY) {
   if (!viewer.isOpen()) {
     return null;
   }
-  const viewportPoint = viewer.viewport.pointFromPixel(new OpenSeadragon.Point(canvasX, canvasY));
-  const imagePoint = viewer.viewport.viewportToImageCoordinates(viewportPoint);
+  const viewportPoint = viewer.viewport.pointFromPixel(new OpenSeadragon.Point(canvasX, canvasY), true);
+  const imagePoint = viewer.world.getItemAt(0).viewportToImageCoordinates(viewportPoint, true);
   return { x: imagePoint.x, y: imagePoint.y };
 }
 
@@ -157,8 +157,9 @@ function imageToCanvas(imageX, imageY) {
   if (!viewer.isOpen()) {
     return null;
   }
-  const viewportPoint = viewer.viewport.imageToViewportCoordinates(imageX, imageY);
-  const pixelPoint = viewer.viewport.pixelFromPoint(viewportPoint);
+  // Use the tissue image and its currently rendered position while animating.
+  const viewportPoint = viewer.world.getItemAt(0).imageToViewportCoordinates(imageX, imageY, true);
+  const pixelPoint = viewer.viewport.pixelFromPoint(viewportPoint, true);
   return { x: pixelPoint.x, y: pixelPoint.y };
 }
 
@@ -317,7 +318,7 @@ function focusAnnotation(annotationId) {
     focusWidth = (maxX - minX) * 2;
   }
 
-  const viewportCenter = viewer.viewport.imageToViewportCoordinates(centerX, centerY);
+  const viewportCenter = viewer.world.getItemAt(0).imageToViewportCoordinates(centerX, centerY, true);
   const viewportWidth = focusWidth / state.currentCase.viewer_width;
   const zoom = 1 / Math.max(viewportWidth, 0.05);
   viewer.viewport.panTo(viewportCenter);
@@ -989,8 +990,7 @@ new OpenSeadragon.MouseTracker({
     if (!viewer.isOpen() || !state.currentCase) {
       return;
     }
-    const viewportPoint = viewer.viewport.pointFromPixel(event.position);
-    const imagePoint = viewer.viewport.viewportToImageCoordinates(viewportPoint);
+    const imagePoint = canvasToImage(event.position.x, event.position.y);
     const sourceX = imagePoint.x * (state.currentCase.source_width / state.currentCase.viewer_width);
     const sourceY = imagePoint.y * (state.currentCase.source_height / state.currentCase.viewer_height);
     elements.statusCoords.textContent = `Position: (${Math.round(sourceX).toLocaleString()}, ${Math.round(sourceY).toLocaleString()})`;
