@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import gzip
+import hashlib
 import io
 import json
 from functools import lru_cache
 from pathlib import Path
 
 from fastapi import Body, FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
 
@@ -77,7 +78,7 @@ def _patch_thumbnail_path(patches_path: Path, rank: int, size: int) -> Path:
     return patches_path.parent / "patch_thumbnails" / str(size) / f"{rank}.png"
 
 
-@lru_cache(maxsize=4096)
+@lru_cache(maxsize=512)
 def _render_patch_thumbnail(
     case_id: str,
     concept_id: str,
@@ -89,7 +90,7 @@ def _render_patch_thumbnail(
     case = get_case(case_id)
     patch = get_patch(case_id, concept_id, rank)
 
-    crop, _ = crop_patch(case, patch)
+    crop, _ = crop_patch(case, patch, original_resolution=False)
     crop = crop.resize((output_size, output_size), Image.Resampling.LANCZOS)
 
     buffer = io.BytesIO()
@@ -98,8 +99,12 @@ def _render_patch_thumbnail(
 
 
 @app.get("/")
-def index() -> FileResponse:
-    return FileResponse(STATIC_DIR / "index.html")
+def index() -> HTMLResponse:
+    html = (STATIC_DIR / "index.html").read_text(encoding="utf-8")
+    for asset in ("styles.css", "app.js"):
+        revision = hashlib.sha256((STATIC_DIR / asset).read_bytes()).hexdigest()[:16]
+        html = html.replace(f'"/static/{asset}"', f'"/static/{asset}?v={revision}"')
+    return HTMLResponse(html, headers=NO_STORE_HEADERS)
 
 
 @app.get("/api/health")
@@ -207,8 +212,7 @@ def api_patch_thumbnail(case_id: str, concept_id: str, rank: int, size: int = 12
     output_size = max(48, min(size, 256))
 
     thumbnail_path = _patch_thumbnail_path(concept.patches_path, patch.rank, output_size)
-    source_path, original = patch_image_source(case)
-    if not original and thumbnail_path.exists() and thumbnail_path.is_file():
+    if thumbnail_path.is_file():
         return FileResponse(thumbnail_path, media_type="image/png", headers=VERSIONED_CACHE_HEADERS)
 
     content = _render_patch_thumbnail(
@@ -216,7 +220,7 @@ def api_patch_thumbnail(case_id: str, concept_id: str, rank: int, size: int = 12
         concept.id,
         patch.rank,
         output_size,
-        str(source_path.stat().st_mtime_ns),
+        str(case.slide_path.stat().st_mtime_ns),
         concept.patches_revision,
     )
     return Response(

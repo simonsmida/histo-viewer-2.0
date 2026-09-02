@@ -105,4 +105,6 @@ To enable original-resolution crops, place an original image inside its case dir
 
 The local demonstration has matching original TIFFs for Samples 2 and 3. Sample 2's ImageJ TIFF records micrometre units and 1.371211 pixels per micrometre (0.7292823643 µm/pixel); Sample 3 has no usable physical calibration. Sample 1 currently uses the preview fallback. These files and case metadata remain under ignored `data/` and must be transferred separately for any deployment.
 
+The patch list serves precomputed thumbnails directly from disk, using preview-image crops only if a thumbnail is missing. Full-resolution images are decoded for explicit detailed inspection. Decoding and cropping share a lock, and the cache retains one full slide; this prevents concurrent cold requests from exhausting a small server's memory. Keep the single application worker in the systemd service, since each extra worker has its own image cache. The HTML response is not cached and includes content-versioned CSS/JavaScript URLs to prevent mixed interface versions after deployment.
+
 Future research work: evaluate feature consistency beyond top-ranked patches, including intermediate/random active examples and controls from held-out slides. This is not part of the current demonstration UI.

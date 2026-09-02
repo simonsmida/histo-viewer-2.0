@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from contextlib import contextmanager
 from pathlib import Path
 from threading import Lock
 
@@ -33,6 +34,17 @@ class RasterSlide:
         return canvas
 
 
-@lru_cache(maxsize=16)
-def load_slide(path_value: str, mode: str, revision: str) -> RasterSlide:
+_slide_lock = Lock()
+
+
+@lru_cache(maxsize=1)
+def _load_slide(path_value: str, mode: str, revision: str) -> RasterSlide:
     return RasterSlide(Path(path_value), mode)
+
+
+@contextmanager
+def load_slide(path_value: str, mode: str, revision: str):
+    # lru_cache alone permits duplicate concurrent cold loads. Hold the lock
+    # through the crop so requests cannot retain many evicted full-size images.
+    with _slide_lock:
+        yield _load_slide(path_value, mode, revision)
