@@ -494,7 +494,10 @@ elements.patchDialog.addEventListener("close", () => { state.detailRequestToken 
 
 function removeSelectedPatchOverlay() {
   state.selectedPatch = null;
-  document.getElementById("selectedPatchActions").hidden = true;
+  const actions = document.getElementById("selectedPatchActions");
+  actions.classList.add("is-hidden");
+  actions.setAttribute("aria-hidden", "true");
+  actions.querySelector("button").tabIndex = -1;
   if (state.selectedPatchOverlay) {
     viewer.removeOverlay(state.selectedPatchOverlay);
     state.selectedPatchOverlay = null;
@@ -514,7 +517,10 @@ function applySelectedPatchOverlay(patch) {
     </svg>
   `;
   state.selectedPatch = patch;
-  document.getElementById("selectedPatchActions").hidden = false;
+  const actions = document.getElementById("selectedPatchActions");
+  actions.classList.remove("is-hidden");
+  actions.setAttribute("aria-hidden", "false");
+  actions.querySelector("button").tabIndex = 0;
   document.getElementById("selectedPatchLabel").textContent = `Patch ${patch.rank} selected`;
   state.selectedPatchOverlay = overlay;
   viewer.addOverlay({
