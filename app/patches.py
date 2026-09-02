@@ -30,20 +30,21 @@ def physical_pixel_size(case: Case) -> tuple[float, float] | None:
     return float(x), float(y)
 
 
-def crop_patch(case: Case, patch: Patch, *, context: int = 1) -> tuple[Image.Image, bool]:
-    path, original = patch_image_source(case)
+def crop_patch(case: Case, patch: Patch, *, context: int = 1,
+               original_resolution: bool = True) -> tuple[Image.Image, bool]:
+    path, original = patch_image_source(case) if original_resolution else (case.slide_path, False)
     revision = str(path.stat().st_mtime_ns)
-    slide = load_slide(str(path), "RGB", revision)
-    sx = slide.dimensions[0] / case.source_width
-    sy = slide.dimensions[1] / case.source_height
-    margin = case.patch_size * (context - 1) / 2
-    left = max(0, round((patch.source_x - margin) * sx))
-    top = max(0, round((patch.source_y - margin) * sy))
-    right = min(slide.dimensions[0], round((patch.source_x + case.patch_size + margin) * sx))
-    bottom = min(slide.dimensions[1], round((patch.source_y + case.patch_size + margin) * sy))
-    if right <= left or bottom <= top:
-        raise HTTPException(404, "Patch is outside the image")
-    image = slide.read_region((left, top), (right - left, bottom - top)).convert("RGB")
+    with load_slide(str(path), "RGB", revision) as slide:
+        sx = slide.dimensions[0] / case.source_width
+        sy = slide.dimensions[1] / case.source_height
+        margin = case.patch_size * (context - 1) / 2
+        left = max(0, round((patch.source_x - margin) * sx))
+        top = max(0, round((patch.source_y - margin) * sy))
+        right = min(slide.dimensions[0], round((patch.source_x + case.patch_size + margin) * sx))
+        bottom = min(slide.dimensions[1], round((patch.source_y + case.patch_size + margin) * sy))
+        if right <= left or bottom <= top:
+            raise HTTPException(404, "Patch is outside the image")
+        image = slide.read_region((left, top), (right - left, bottom - top)).convert("RGB")
     if context > 1:
         box = (round(patch.source_x * sx) - left, round(patch.source_y * sy) - top,
                round((patch.source_x + case.patch_size) * sx) - left - 1,
