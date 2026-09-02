@@ -97,7 +97,7 @@ Subsequent deployments transport code through Git and data through rsync. Never 
 
 ## Pathologist demonstration controls
 
-The image slider blends transparent, exact patch footprints over the histology image. The legend shows relative pattern strength within the selected image/group, using raw activation divided by that group's maximum. It does not compare scores across images. Highlights do not alter the underlying tissue colors or blur patch boundaries. The older precomputed overlay images remain available through the API but are not used by this demonstration UI.
+The image slider blends the original interpolated Turbo heatmap over the histology image. Both use precomputed Deep Zoom tiles in the same OpenSeadragon viewport, so pan and zoom stay synchronized. The legend runs from weaker to stronger pattern response. The export normalizes each image/group separately; the colors are not comparable across images.
 
 Click a patch to inspect its original-resolution crop and surrounding tissue, then choose **View location in image** to return to the zoomed location. Without an original, the dialog explicitly identifies the reduced preview fallback.
 
