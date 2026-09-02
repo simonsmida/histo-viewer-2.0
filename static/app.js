@@ -90,6 +90,7 @@ const state = {
   selectedPatchKey: null,
   selectedPatch: null,
   selectedPatchOverlay: null,
+  focusReturnViewport: null,
   heatmapItem: null,
   overlayRequestToken: 0,
   detailRequestToken: 0,
@@ -447,6 +448,14 @@ function focusPatch(patch) {
   viewer.viewport.fitBounds(new OpenSeadragon.Rect(rect.x - margin, rect.y - margin, rect.width + margin * 2, rect.height + margin * 2));
 }
 
+function restoreFocusViewport() {
+  const previous = state.focusReturnViewport;
+  state.focusReturnViewport = null;
+  if (!previous) return;
+  viewer.viewport.zoomTo(previous.zoom);
+  viewer.viewport.panTo(previous.center);
+}
+
 async function inspectPatch(patch) {
   const token = ++state.detailRequestToken;
   const base = `/api/cases/${encodeURIComponent(state.currentCase.id)}/concepts/${encodeURIComponent(state.currentConcept.id)}/patches/${patch.rank}`;
@@ -556,6 +565,21 @@ function renderPatchGrid(reset = true) {
     card.setAttribute("aria-label", `Show patch ${patch.rank} in image`);
     card.innerHTML = `<img class="patch-thumb" src="${patch.thumbnail_url}" loading="lazy" decoding="async" alt="Patch #${patch.rank}" />`;
     card.addEventListener("click", () => {
+      if (state.selectedPatchKey === patchKey) {
+        const previous = state.focusReturnViewport;
+        state.selectedPatchKey = null;
+        removeSelectedPatchOverlay();
+        state.focusReturnViewport = previous;
+        updateActivePatchCard();
+        restoreFocusViewport();
+        return;
+      }
+      if (!state.selectedPatchKey && viewer.isOpen()) {
+        state.focusReturnViewport = {
+          center: viewer.viewport.getCenter(),
+          zoom: viewer.viewport.getZoom(),
+        };
+      }
       state.selectedPatchKey = patchKey;
       applySelectedPatchOverlay(patch);
       updateActivePatchCard();
@@ -611,6 +635,7 @@ async function loadConcept(conceptId) {
   elements.patchEmptyState.querySelector("p").textContent = "Loading patches...";
   elements.patchMore.hidden = true;
   state.selectedPatchKey = null;
+  state.focusReturnViewport = null;
   removeSelectedPatchOverlay();
 
   const cachedConcept = state.conceptCache.get(cacheKey);
@@ -851,6 +876,7 @@ elements.caseSelect.addEventListener("change", async () => {
   setNavigationBusy(true);
   try {
     removeHeatmapOverlay();
+    state.focusReturnViewport = null;
     removeSelectedPatchOverlay();
     await loadCase(elements.caseSelect.value);
     await populateConcepts(elements.caseSelect.value);
