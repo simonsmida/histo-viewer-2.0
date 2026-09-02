@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import os
 from pathlib import Path
 
 from PIL import Image
@@ -128,10 +129,18 @@ def process_tree(
     overlap: int,
     jpeg_quality: int,
 ) -> None:
-    image_paths = sorted(
-        p for p in input_root.rglob("*")
-        if p.suffix.lower() in {".png", ".jpg", ".jpeg", ".tif", ".tiff"}
-    )
+    image_paths = []
+    for directory, subdirs, filenames in os.walk(input_root):
+        # Generated tiles and patch thumbnails are not source images.
+        subdirs[:] = [
+            name for name in subdirs
+            if not name.endswith("_files") and name != "patch_thumbnails"
+        ]
+        for filename in filenames:
+            path = Path(directory) / filename
+            if path.suffix.lower() in {".png", ".jpg", ".jpeg", ".tif", ".tiff"}:
+                image_paths.append(path)
+    image_paths.sort()
 
     if not image_paths:
         raise SystemExit(f"No images found under {input_root}")
