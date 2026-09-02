@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT))
 from PIL import Image
 
 from app.catalog import Concept, Case, Patch, load_cases, load_patches
-from app.tiles import load_slide
+from app.patches import crop_patch, patch_image_source
 
 Image.MAX_IMAGE_PIXELS = None
 
@@ -22,30 +22,11 @@ def thumbnail_path(concept: Concept, rank: int, size: int) -> Path:
 
 def render_thumbnail(case: Case, concept: Concept, patch: Patch, size: int, force: bool) -> bool:
     output_path = thumbnail_path(concept, patch.rank, size)
-    if output_path.exists() and not force:
+    source, _ = patch_image_source(case)
+    if output_path.exists() and not force and output_path.stat().st_mtime_ns >= source.stat().st_mtime_ns:
         return False
 
-    scale_x = case.viewer_width / case.source_width
-    scale_y = case.viewer_height / case.source_height
-    crop_left = int(round(patch.source_x * scale_x))
-    crop_top = int(round(patch.source_y * scale_y))
-    crop_width = max(1, int(round(case.patch_size * scale_x)))
-    crop_height = max(1, int(round(case.patch_size * scale_y)))
-
-    slide = load_slide(str(case.slide_path), "RGB", case.slide_revision)
-    crop_box = (
-        max(0, crop_left),
-        max(0, crop_top),
-        min(slide.dimensions[0], crop_left + crop_width),
-        min(slide.dimensions[1], crop_top + crop_height),
-    )
-    if crop_box[0] >= crop_box[2] or crop_box[1] >= crop_box[3]:
-        return False
-
-    crop = slide.read_region(
-        (crop_box[0], crop_box[1]),
-        (crop_box[2] - crop_box[0], crop_box[3] - crop_box[1]),
-    ).convert("RGB")
+    crop, _ = crop_patch(case, patch)
     crop = crop.resize((size, size), Image.Resampling.LANCZOS)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

@@ -39,6 +39,9 @@ class Case:
     slide_revision: str
     concepts: tuple[Concept, ...]
     concepts_by_id: dict[str, Concept]
+    source_image_path: Path | None = None
+    microns_per_pixel_x: float | None = None
+    microns_per_pixel_y: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -103,6 +106,9 @@ def _load_case(case_dir: Path) -> Case:
         slide_revision=_dzi_revision(slide_path),
         concepts=concepts,
         concepts_by_id={concept.id: concept for concept in concepts},
+        source_image_path=(case_dir / payload["source_image_path"]) if payload.get("source_image_path") else None,
+        microns_per_pixel_x=payload.get("microns_per_pixel_x"),
+        microns_per_pixel_y=payload.get("microns_per_pixel_y"),
     )
 
 
@@ -225,7 +231,8 @@ def _concept_detail_cached(
     case = get_case(case_id)
     concept = get_concept(case_id, concept_id)
     patches = _load_patches_cached(case_id, concept_id, patches_revision)
-    thumbnail_revision = f"{slide_revision}-{patches_revision}"
+    source_revision = _path_revision(case.source_image_path) if case.source_image_path and case.source_image_path.is_file() else slide_revision
+    thumbnail_revision = f"{source_revision}-{patches_revision}"
     return {
         "id": concept.id,
         "label": concept.label,

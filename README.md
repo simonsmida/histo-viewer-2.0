@@ -94,3 +94,15 @@ Local changes are tested, committed, pushed, then fast-forwarded into the server
 **Before first deploying the commit that removes data from Git tracking:** back up the complete server `data/` directory outside the checkout and verify the backup. Stop the service for this migration to avoid losing new annotations. Pull the code, restore the data into `data/`, verify it, and restart the service. Git may delete formerly tracked data during this first pull; `.gitignore` does not prevent that. Do not delete the backup until the viewer has been verified.
 
 Subsequent deployments transport code through Git and data through rsync. Never commit `.venv/`, runtime data, or credentials. Removing data from the current Git index does not shrink existing Git history; rewriting history is a separate operation.
+
+## Pathologist demonstration controls
+
+The image slider blends transparent, exact patch footprints over the histology image. The legend shows relative pattern strength within the selected image/group, using raw activation divided by that group's maximum. It does not compare scores across images. Highlights do not alter the underlying tissue colors or blur patch boundaries. The older precomputed overlay images remain available through the API but are not used by this demonstration UI.
+
+Click a patch to inspect its original-resolution crop and surrounding tissue, then choose **View location in image** to return to the zoomed location. Without an original, the dialog explicitly identifies the reduced preview fallback.
+
+To enable original-resolution crops, place an original image inside its case directory and add `source_image_path` (a path relative to that directory) to `case.json`. Its dimensions must match `source_width` and `source_height`. Add `microns_per_pixel_x` and `microns_per_pixel_y` only when physical calibration is known. A scale bar and patch measurements appear only with valid calibration. Image dimensions alone are not a physical calibration.
+
+The local demonstration has matching original TIFFs for Samples 2 and 3. Sample 2's ImageJ TIFF records micrometre units and 1.371211 pixels per micrometre (0.7292823643 µm/pixel); Sample 3 has no usable physical calibration. Sample 1 currently uses the preview fallback. These files and case metadata remain under ignored `data/` and must be transferred separately for any deployment.
+
+Future research work: evaluate feature consistency beyond top-ranked patches, including intermediate/random active examples and controls from held-out slides. This is not part of the current demonstration UI.

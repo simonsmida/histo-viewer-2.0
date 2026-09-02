@@ -21,7 +21,7 @@ from .catalog import (
     list_cases,
     list_concepts,
 )
-from .tiles import load_slide
+from .patches import crop_patch, patch_image_source, physical_pixel_size
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -89,27 +89,7 @@ def _render_patch_thumbnail(
     case = get_case(case_id)
     patch = get_patch(case_id, concept_id, rank)
 
-    scale_x = case.viewer_width / case.source_width
-    scale_y = case.viewer_height / case.source_height
-    crop_left = int(round(patch.source_x * scale_x))
-    crop_top = int(round(patch.source_y * scale_y))
-    crop_width = max(1, int(round(case.patch_size * scale_x)))
-    crop_height = max(1, int(round(case.patch_size * scale_y)))
-
-    slide = load_slide(str(case.slide_path), "RGB", slide_revision)
-    crop_box = (
-        max(0, crop_left),
-        max(0, crop_top),
-        min(slide.dimensions[0], crop_left + crop_width),
-        min(slide.dimensions[1], crop_top + crop_height),
-    )
-    if crop_box[0] >= crop_box[2] or crop_box[1] >= crop_box[3]:
-        raise HTTPException(status_code=404, detail="Patch crop is outside the slide bounds")
-
-    crop = slide.read_region(
-        (crop_box[0], crop_box[1]),
-        (crop_box[2] - crop_box[0], crop_box[3] - crop_box[1]),
-    ).convert("RGB")
+    crop, _ = crop_patch(case, patch)
     crop = crop.resize((output_size, output_size), Image.Resampling.LANCZOS)
 
     buffer = io.BytesIO()
@@ -145,6 +125,8 @@ def api_case_info(case_id: str) -> dict:
         "patch_size": case.patch_size,
         "default_concept_id": case.default_concept_id,
         "concept_count": len(case.concepts),
+        "microns_per_pixel": physical_pixel_size(case),
+        "original_available": patch_image_source(case)[1],
         "base_dzi_url": f"/api/cases/{case.id}/{case.slide_revision}.dzi",
     }
 
@@ -225,7 +207,8 @@ def api_patch_thumbnail(case_id: str, concept_id: str, rank: int, size: int = 12
     output_size = max(48, min(size, 256))
 
     thumbnail_path = _patch_thumbnail_path(concept.patches_path, patch.rank, output_size)
-    if thumbnail_path.exists() and thumbnail_path.is_file():
+    source_path, original = patch_image_source(case)
+    if not original and thumbnail_path.exists() and thumbnail_path.is_file():
         return FileResponse(thumbnail_path, media_type="image/png", headers=VERSIONED_CACHE_HEADERS)
 
     content = _render_patch_thumbnail(
@@ -233,7 +216,7 @@ def api_patch_thumbnail(case_id: str, concept_id: str, rank: int, size: int = 12
         concept.id,
         patch.rank,
         output_size,
-        case.slide_revision,
+        str(source_path.stat().st_mtime_ns),
         concept.patches_revision,
     )
     return Response(
@@ -241,6 +224,35 @@ def api_patch_thumbnail(case_id: str, concept_id: str, rank: int, size: int = 12
         media_type="image/png",
         headers=VERSIONED_CACHE_HEADERS,
     )
+
+
+@app.get("/api/cases/{case_id}/concepts/{concept_id}/patches/{rank:int}/detail")
+def api_patch_detail(case_id: str, concept_id: str, rank: int) -> dict:
+    case = get_case(case_id)
+    patch = get_patch(case_id, concept_id, rank)
+    path, original = patch_image_source(case)
+    scale = physical_pixel_size(case)
+    image, _ = crop_patch(case, patch)
+    return {
+        "rank": patch.rank, "patch_index": patch.patch_index,
+        "source_x": patch.source_x, "source_y": patch.source_y,
+        "source_patch_size": case.patch_size,
+        "crop_width": image.width, "crop_height": image.height,
+        "original_available": original,
+        "width_um": case.patch_size * scale[0] if scale else None,
+        "height_um": case.patch_size * scale[1] if scale else None,
+        "image_revision": str(path.stat().st_mtime_ns),
+    }
+
+
+@app.get("/api/cases/{case_id}/concepts/{concept_id}/patches/{rank:int}/crop.png")
+def api_patch_crop(case_id: str, concept_id: str, rank: int, context: int = 1) -> Response:
+    if context not in (1, 5):
+        raise HTTPException(422, "Context must be 1 or 5")
+    image, _ = crop_patch(get_case(case_id), get_patch(case_id, concept_id, rank), context=context)
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    return Response(buffer.getvalue(), media_type="image/png", headers=NO_STORE_HEADERS)
 
 
 @app.get("/api/cases/{case_id}/annotations")

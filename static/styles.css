@@ -181,6 +181,7 @@ body {
 }
 
 .viewer-controls {
+  max-width: calc(100% - 24px);
   position: absolute;
   top: 12px;
   left: 12px;
@@ -206,56 +207,12 @@ body {
   font-weight: 500;
 }
 
-.vc-divider {
-  width: 1px;
-  height: 16px;
-  background: var(--border);
-}
-
-.toggle-switch {
-  position: relative;
-  width: 36px;
-  height: 20px;
-  background: #c5cbd3;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background var(--transition);
-}
-
-.toggle-switch::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 16px;
-  height: 16px;
-  background: #fff;
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  transition: left var(--transition);
-}
-
-.toggle-switch.active {
-  background: var(--accent);
-}
-
-.toggle-switch.active::after {
-  left: 18px;
-}
-
-.opacity-range {
-  width: 90px;
+.blend-range {
+  width: 110px;
+  min-width: 50px;
   height: 4px;
   accent-color: var(--accent);
   cursor: pointer;
-}
-
-.opacity-value {
-  width: 34px;
-  color: var(--text-muted);
-  font-size: 11px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
 }
 
 #viewer {
@@ -573,9 +530,16 @@ body {
 
 .annot-toolbar {
   display: flex;
-  gap: 6px;
-  padding: 0 16px 10px;
-  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 12px 10px;
+  flex-wrap: nowrap;
+}
+
+.annot-toolbar .btn {
+  flex: 1 0 auto;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 4px;
 }
 
 .annot-list {
@@ -775,3 +739,42 @@ body {
     border-top: 1px solid var(--border);
   }
 }
+
+/* Pattern highlights use exact patch footprints over the original tissue. */
+#patternCanvas {
+  position: absolute;
+  inset: 0 0 28px;
+  width: 100%;
+  height: calc(100% - 28px);
+  pointer-events: none;
+  z-index: 20;
+}
+.pattern-legend {
+  position: absolute;
+  left: 12px;
+  bottom: 42px;
+  z-index: 50;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,.95);
+  color: var(--text-secondary);
+  font-size: 11px;
+  box-shadow: var(--shadow-sm);
+}
+.legend-scale { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+.legend-gradient { width: 84px; height: 8px; border-radius: 4px; background: linear-gradient(to right, rgb(255,230,120), rgb(194,24,48)); }
+.pattern-legend small { font-size: 10px; color: var(--text-muted); }
+.image-scale { position: absolute; bottom: 42px; left: 238px; z-index: 50; background: rgba(255,255,255,.95); padding: 8px; border-radius: 4px; font-size: 11px; }
+.image-scale span { display: block; }
+#scaleLine { border: solid var(--text-primary); border-width: 0 2px 2px; height: 6px; margin-bottom: 4px; }
+.patch-dialog { width: min(760px, calc(100vw - 32px)); margin: auto; padding: 22px; border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-primary); }
+.patch-dialog::backdrop { background: rgba(0,0,0,.4); }
+.patch-dialog-heading { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 10px; }
+.patch-dialog h2 { font-size: 18px; }
+.patch-dialog p { margin: 10px 0; color: var(--text-secondary); font-size: 13px; }
+.patch-detail-images { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 14px; }
+.patch-detail-images[hidden] { display: none; }
+.patch-detail-images figure { min-width: 0; }
+.patch-detail-images img { width: 100%; aspect-ratio: 1; object-fit: contain; background: #fafafa; border: 1px solid var(--border-light); }
+.patch-detail-images figcaption { font-size: 12px; margin-top: 5px; color: var(--text-secondary); }
+@media (max-width: 600px) { .image-scale { left: auto; right: 12px; } }
