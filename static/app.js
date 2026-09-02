@@ -40,7 +40,11 @@ const elements = {
   annotSave: document.getElementById("annotSave"),
   annotToggleAll: document.getElementById("annotToggleAll"),
   caseSelect: document.getElementById("caseSelect"),
+  casePrevious: document.getElementById("casePrevious"),
+  caseNext: document.getElementById("caseNext"),
   conceptSelect: document.getElementById("conceptSelect"),
+  conceptPrevious: document.getElementById("conceptPrevious"),
+  conceptNext: document.getElementById("conceptNext"),
   coordBar: document.getElementById("coordBar"),
   headerStatus: document.getElementById("headerStatus"),
   heatmapToggle: document.getElementById("heatmapToggle"),
@@ -80,6 +84,22 @@ const state = {
   selectedPatchOverlay: null,
   visiblePatchCount: PATCH_BATCH_SIZE,
 };
+
+function setNavigationBusy(busy) {
+  for (const prefix of ["case", "concept"]) {
+    const select = elements[`${prefix}Select`];
+    select.disabled = busy || select.options.length === 0;
+    elements[`${prefix}Previous`].disabled = busy || select.options.length < 2;
+    elements[`${prefix}Next`].disabled = busy || select.options.length < 2;
+  }
+}
+
+function stepSelect(select, offset) {
+  const count = select.options.length;
+  if (select.disabled || count < 2) return;
+  select.selectedIndex = (select.selectedIndex + offset + count) % count;
+  select.dispatchEvent(new Event("change", { bubbles: true }));
+}
 
 function setStatus(message, isError = false) {
   elements.headerStatus.textContent = message;
@@ -757,6 +777,7 @@ elements.annotToggleAll.addEventListener("click", () => {
 });
 
 elements.caseSelect.addEventListener("change", async () => {
+  setNavigationBusy(true);
   try {
     removeHeatmapOverlay();
     removeSelectedPatchOverlay();
@@ -765,17 +786,27 @@ elements.caseSelect.addEventListener("change", async () => {
   } catch (error) {
     console.error(error);
     setStatus("Failed to load histology image.", true);
+  } finally {
+    setNavigationBusy(false);
   }
 });
 
 elements.conceptSelect.addEventListener("change", async () => {
+  setNavigationBusy(true);
   try {
     await loadConcept(elements.conceptSelect.value);
   } catch (error) {
     console.error(error);
     setStatus("Failed to load potential concept.", true);
+  } finally {
+    setNavigationBusy(false);
   }
 });
+
+for (const prefix of ["case", "concept"]) {
+  elements[`${prefix}Previous`].addEventListener("click", () => stepSelect(elements[`${prefix}Select`], -1));
+  elements[`${prefix}Next`].addEventListener("click", () => stepSelect(elements[`${prefix}Select`], 1));
+}
 
 elements.patchMore.addEventListener("click", () => {
   state.visiblePatchCount += PATCH_BATCH_SIZE;
@@ -900,6 +931,8 @@ async function init() {
   } catch (error) {
     console.error(error);
     setStatus("Failed to initialize the local viewer.", true);
+  } finally {
+    setNavigationBusy(false);
   }
 }
 

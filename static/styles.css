@@ -393,6 +393,50 @@ body {
   gap: 10px;
 }
 
+.select-navigation {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 6px;
+}
+
+.select-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.select-step:hover:not(:disabled) {
+  border-color: #c5cbd3;
+  background: var(--bg-surface-alt);
+  color: var(--text-primary);
+}
+
+.select-step:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.select-step:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.select-navigation .styled-select {
+  min-width: 0;
+}
+
 .form-label {
   display: block;
   margin-bottom: 5px;

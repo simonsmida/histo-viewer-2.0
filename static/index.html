@@ -97,11 +97,19 @@
             <div class="browser-fields">
               <div class="browser-field">
                 <label class="form-label" for="caseSelect">Histology image</label>
-                <select class="styled-select panel-select" id="caseSelect"></select>
+                <div class="select-navigation">
+                  <button class="select-step" id="casePrevious" type="button" aria-label="Previous histology image" title="Previous histology image" disabled>&#8249;</button>
+                  <select class="styled-select panel-select" id="caseSelect" disabled></select>
+                  <button class="select-step" id="caseNext" type="button" aria-label="Next histology image" title="Next histology image" disabled>&#8250;</button>
+                </div>
               </div>
               <div class="browser-field">
                 <label class="form-label" for="conceptSelect">Potential concept</label>
-                <select class="styled-select panel-select" id="conceptSelect"></select>
+                <div class="select-navigation">
+                  <button class="select-step" id="conceptPrevious" type="button" aria-label="Previous potential concept" title="Previous potential concept" disabled>&#8249;</button>
+                  <select class="styled-select panel-select" id="conceptSelect" disabled></select>
+                  <button class="select-step" id="conceptNext" type="button" aria-label="Next potential concept" title="Next potential concept" disabled>&#8250;</button>
+                </div>
               </div>
             </div>
             <p class="browser-hint">Choose an image and potential concept to inspect the heatmap and compare the strongest matching tissue patches.</p>
