@@ -786,4 +786,4 @@ body {
 #annotationSaveStatus { font-size: 11px; color: var(--text-secondary); }
 .selected-patch-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 16px 12px; font-size: 12px; color: var(--text-secondary); }
 
-.selected-patch-actions[hidden] { display: none; }
+.selected-patch-actions.is-hidden { visibility: hidden; pointer-events: none; }
