@@ -206,7 +206,7 @@ function resetReviewForGroup() {
   loadStudyDiscovery();
 }
 
-const studyUI = Object.fromEntries(["studyDiscoveryGrid", "studyStartForm", "studyAssessment",
+const studyUI = Object.fromEntries(["studyDiscoveryGrid", "studyStartForm", "studyReviewer", "studyAssessment",
   "studyPattern", "studyConfidence", "studyStart", "studyStartStatus"].map(id => [id, document.getElementById(id)]));
 
 async function loadStudyDiscovery() {
@@ -245,12 +245,14 @@ studyUI.studyStartForm.addEventListener("submit", async event => {
   try {
     const study = await fetchJson("/api/studies", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({
       case_id: state.currentCase.id, concept_id: state.currentConcept.id,
-      assessment: studyUI.studyAssessment.value, pattern: studyUI.studyPattern.value,
+      reviewer: studyUI.studyReviewer.value, assessment: studyUI.studyAssessment.value, pattern: studyUI.studyPattern.value,
       confidence: studyUI.studyConfidence.querySelector("input:checked")?.value || "medium",
     })});
     window.location.href = `/study/review?id=${encodeURIComponent(study.id)}`;
   } catch (error) {
-    studyUI.studyStartStatus.textContent = error.message.includes("422") ? "Check the entries and choose a group with enough patches." : "The study could not be created.";
+    let detail = "The study could not be created.";
+    try { detail = JSON.parse(error.message).detail || detail; } catch { /* use the concise fallback */ }
+    studyUI.studyStartStatus.textContent = detail;
     studyUI.studyStart.disabled = false;
   }
 });

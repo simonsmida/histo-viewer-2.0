@@ -142,6 +142,8 @@
           <h2>Describe the prevalent pattern</h2>
           <div id="studyDiscoveryGrid" class="study-discovery-grid" aria-live="polite"></div>
           <form id="studyStartForm">
+            <label class="form-label" for="studyReviewer">Expert ID</label>
+            <input id="studyReviewer" maxlength="40" required autocomplete="off" placeholder="e.g. Pathologist-01" />
             <label class="form-label" for="studyAssessment">Is there a recognizable prevalent pattern?</label>
             <select id="studyAssessment" class="styled-select">
               <option value="clear">Yes, clear</option>
@@ -152,10 +154,10 @@
             </select>
             <label class="form-label" for="studyPattern">Prevalent pattern</label>
             <textarea id="studyPattern" rows="3" maxlength="1000" placeholder="Example: adipose tissue with large clear vacuoles" required></textarea>
-            <fieldset class="confidence-group" id="studyConfidence"><legend>Confidence</legend>
-              <label><input type="radio" name="study-confidence" value="high"> High</label>
-              <label><input type="radio" name="study-confidence" value="medium" checked> Medium</label>
-              <label><input type="radio" name="study-confidence" value="low"> Low</label>
+            <fieldset class="confidence-group" id="studyConfidence"><legend>How confident are you in this description?</legend>
+              <label><input type="radio" name="study-confidence" value="high"><span><b>High</b><small>Clear and specific</small></span></label>
+              <label><input type="radio" name="study-confidence" value="medium" checked><span><b>Medium</b><small>Reasonably clear</small></span></label>
+              <label><input type="radio" name="study-confidence" value="low"><span><b>Low</b><small>Only partly clear</small></span></label>
             </fieldset>
             <button class="btn study-start" id="studyStart" type="submit">Start blinded patch review</button>
             <p id="studyStartStatus" class="study-status" role="status"></p>

@@ -819,5 +819,10 @@ body {
 .confidence-group { border: 0; padding: 0; margin: 14px 0 0; display: flex; gap: 8px; }
 .confidence-group legend { font-size: 12px; font-weight: 650; margin-bottom: 7px; }
 .confidence-group label { flex: 1; border: 1px solid var(--border); border-radius: 5px; padding: 8px; font-size: 12px; text-align: center; cursor: pointer; }
+.confidence-group label { display: flex; align-items: flex-start; justify-content: center; gap: 5px; text-align: left; }
+.confidence-group label span { display: block; }
+.confidence-group small { display: block; color: var(--text-muted); font-size: 10px; margin-top: 2px; }
 .confidence-group label:has(input:checked) { border-color: var(--accent); background: var(--accent-light); color: var(--accent); font-weight: 650; }
 .confidence-group input { margin-right: 4px; accent-color: var(--accent); }
+.study-start { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; min-height: 44px; box-shadow: 0 2px 5px rgba(37,99,235,.2); }
+.study-start:hover { background: #1d4ed8; border-color: #1d4ed8; }
