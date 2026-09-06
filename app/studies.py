@@ -25,7 +25,9 @@ from .patches import crop_patch
 router = APIRouter()
 STUDIES_DIR = BASE_DIR / "review-data" / "studies"
 DISCOVERY_COUNT = 12
-PER_STRATUM = 12
+# Compact demo review: four randomly sampled patches from each of the five
+# activation strata, for 20 evaluation patches in total.
+PER_STRATUM = 4
 STRATA = ("zero", "low", "medium", "high", "top")
 
 
