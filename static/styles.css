@@ -833,3 +833,7 @@ body {
 .confidence-choice.medium { border-bottom: 3px solid #4b83d1; }
 .confidence-choice.high { border-bottom: 3px solid #2f9e6f; }
 .confidence-choice.selected { color: var(--text-primary); background: var(--accent-light); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.confidence-choice.low.selected { background: #fff8e5; border-color: #d99000; color: #875f00; box-shadow: 0 0 0 1px #d99000; }
+.confidence-choice.medium.selected { background: #edf4ff; border-color: #4b83d1; color: #28558e; box-shadow: 0 0 0 1px #4b83d1; }
+.confidence-choice.high.selected { background: #edf8ef; border-color: #2f9e6f; color: #216e4d; box-shadow: 0 0 0 1px #2f9e6f; }
+.study-start { display: block; width: 100%; text-align: center; }
