@@ -52,9 +52,8 @@
 .review-overview-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .review-overview h2 { margin: 0; font-size: 17px; }
 .review-overview-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
-.overview-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
-.overview-actions .btn { min-width: 130px; }
-.overview-actions #toggleReviewGrid { min-width: 112px; }
+.answer-actions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.answer-actions .btn { flex: 1; min-width: 0; }
 .review-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 10px; }
 .review-grid[hidden] { display: none; }
 .review-tile { min-width: 0; border: 1px solid var(--line); border-radius: 7px; background: #fff; padding: 5px; text-align: left; cursor: pointer; font: inherit; color: var(--ink); }
@@ -82,8 +81,8 @@
 @media(max-width: 560px) {
   .review-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .review-overview-head { align-items: stretch; flex-direction: column; }
-  .overview-actions { width: 100%; flex-direction: column; }
-  .overview-actions .btn { width: 100%; }
+  .answer-actions { width: 100%; flex-direction: column; }
+  .answer-actions .btn { width: 100%; }
   .patch-pane { display: block; }
   .context-details { display: block; min-height: 0; margin-top: 18px; padding: 12px 0 0; border-right: 0; border-top: 1px solid var(--line); }
   .context-options { position: static; margin-top: 8px; }
