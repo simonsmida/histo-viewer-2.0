@@ -33,7 +33,7 @@ function render() {
   $("choiceReminder").textContent = pendingChoice ? "Saved." : "Answers save automatically.";
   $("previous").disabled = index === 0 || saving;
   $("next").disabled = saving || index === study.total - 1;
-  $("next").textContent = "Next";
+  $("next").textContent = "Next →";
   $("viewResults").disabled = study.completed < study.total || saving;
   renderReviewGrid();
   requestAnimationFrame(updateContextLinks);
