@@ -1,1 +1,90 @@
-const id=new URLSearchParams(location.search).get("id"),$=x=>document.getElementById(x),NS="http://www.w3.org/2000/svg";async function get(){const r=await fetch(`/api/studies/${id}/results`);if(!r.ok)throw Error();return r.json()}const pct=v=>v==null?"—":`${Math.round(v*100)}%`,num=v=>v==null?"—":v.toFixed(3);function node(svg,name,a={},text=""){const e=document.createElementNS(NS,name);for(const[k,v]of Object.entries(a))e.setAttribute(k,v);e.textContent=text;svg.append(e);return e}function axes(svg,xlabel,ylabel){svg.setAttribute("viewBox","0 0 440 260");for(let i=0;i<=4;i++){let y=210-i*45;node(svg,"line",{x1:48,y1:y,x2:424,y2:y,class:"grid"});node(svg,"text",{x:39,y:y+4,"text-anchor":"end"},`${i*25}%`)}node(svg,"line",{x1:48,y1:30,x2:48,y2:210,class:"axis"});node(svg,"line",{x1:48,y1:210,x2:424,y2:210,class:"axis"});node(svg,"text",{x:236,y:253,"text-anchor":"middle"},xlabel);node(svg,"text",{x:12,y:120,transform:"rotate(-90 12 120)","text-anchor":"middle"},ylabel)}function activation(svg,data){axes(svg,"Activation level","Matching patches");const w=52,g=22;data.forEach((d,i)=>{const x=67+i*(w+g),v=d.matching_fraction,h=v==null?0:v*180;node(svg,"rect",{x,y:210-h,width:w,height:h,rx:3,fill:v==null?"#e3e7ed":"#2563eb"});node(svg,"text",{x:x+w/2,y:228,"text-anchor":"middle"},d.stratum[0].toUpperCase()+d.stratum.slice(1));node(svg,"text",{x:x+w/2,y:v==null?200:Math.max(25,202-h),"text-anchor":"middle"},v==null?"n/a":pct(v));node(svg,"text",{x:x+w/2,y:241,"text-anchor":"middle"},`n=${d.assessable_n}`)})}function pr(svg,data,baseline){axes(svg,"Recall","Precision");for(let i=0;i<=4;i++)node(svg,"text",{x:48+i*94,y:228,"text-anchor":"middle"},`${i*25}%`);if(baseline!=null)node(svg,"line",{x1:48,y1:210-baseline*180,x2:424,y2:210-baseline*180,class:"baseline"});if(data.length)node(svg,"polyline",{points:data.map(d=>`${48+d.recall*376},${210-d.precision*180}`).join(" "),class:"data"})}try{const d=await get();$("title").textContent=d.pattern;$("subtitle").textContent=`${d.case_label} · ${d.reviewer}`;$("precision").textContent=pct(d.precision_at_20);$("precisionNote").textContent=`Based on ${d.precision_n} assessable highest-activation patches.`;$("auprc").textContent=num(d.auprc);$("baseline").textContent=`Chance reference (prevalence): ${pct(d.prevalence)}`;$("completed").textContent=`${d.completed}/${d.total}`;$("pattern").textContent=d.pattern;$("meta").textContent=`Discovery assessment: ${d.assessment.replace("_"," ")} · confidence: ${d.confidence}`;activation($("activation"),d.activation_curve);pr($("pr"),d.pr_curve,d.prevalence);const colors={present:"#087f5b",absent:"#c33b48",uncertain:"#d89016",cannot_assess:"#8993a5",unreviewed:"#dfe4ec"};for(const[k,c]of Object.entries(colors)){const n=d.judgment_counts[k];if(n){const s=document.createElement("span");s.style.cssText=`width:${100*n/d.total}%;background:${c}`;s.title=`${k}: ${n}`;$("distribution").append(s);$("distributionLegend").insertAdjacentHTML("beforeend",`<span><i class="dot" style="background:${c}"></i>${k.replace("_"," ")} · ${n}</span>`)}}}catch(e){$("root").innerHTML='<div class="card error">These results could not be loaded.</div>'}
+const id = new URLSearchParams(location.search).get("id");
+const $ = value => document.getElementById(value);
+const NS = "http://www.w3.org/2000/svg";
+
+async function getResults() {
+  const response = await fetch(`/api/studies/${id}/results`);
+  if (!response.ok) throw new Error("Could not load results");
+  return response.json();
+}
+
+const pct = value => value == null ? "—" : `${Math.round(value * 100)}%`;
+const num = value => value == null ? "—" : value.toFixed(3);
+
+function node(svg, name, attributes = {}, text = "") {
+  const element = document.createElementNS(NS, name);
+  for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
+  element.textContent = text;
+  svg.append(element);
+  return element;
+}
+
+function axes(svg, xlabel, ylabel) {
+  svg.setAttribute("viewBox", "0 0 440 260");
+  for (let i = 0; i <= 4; i++) {
+    const y = 210 - i * 45;
+    node(svg, "line", {x1: 48, y1: y, x2: 424, y2: y, class: "grid"});
+    node(svg, "text", {x: 39, y: y + 4, "text-anchor": "end"}, `${i * 25}%`);
+  }
+  node(svg, "line", {x1: 48, y1: 30, x2: 48, y2: 210, class: "axis"});
+  node(svg, "line", {x1: 48, y1: 210, x2: 424, y2: 210, class: "axis"});
+  node(svg, "text", {x: 236, y: 258, "text-anchor": "middle"}, xlabel);
+  node(svg, "text", {x: 4, y: 120, transform: "rotate(-90 4 120)", "text-anchor": "middle"}, ylabel);
+}
+
+function activation(svg, data, prevalence) {
+  axes(svg, "Activation level", "Matching patches");
+  const colors = {zero: "#e2e8f0", low: "#bfdbfe", medium: "#60a5fa", high: "#2563eb", top: "#1e3a8a"};
+  const width = 52, gap = 22;
+  data.forEach((item, index) => {
+    const x = 67 + index * (width + gap);
+    const value = item.matching_fraction;
+    const height = value == null ? 0 : value * 180;
+    node(svg, "rect", {x, y: 210 - height, width, height, rx: 3,
+      fill: value == null ? "#e3e7ed" : (colors[item.stratum] || "#2563eb")});
+    node(svg, "text", {x: x + width / 2, y: 228, "text-anchor": "middle"},
+      item.stratum[0].toUpperCase() + item.stratum.slice(1));
+    node(svg, "text", {x: x + width / 2, y: value == null ? 200 : Math.max(25, 202 - height), "text-anchor": "middle"},
+      value == null ? "n/a" : pct(value));
+    node(svg, "text", {x: x + width / 2, y: 241, "text-anchor": "middle"}, `n=${item.assessable_n}`);
+  });
+  if (prevalence != null) {
+    const y = 210 - prevalence * 180;
+    node(svg, "line", {x1: 48, y1: y, x2: 424, y2: y, class: "baseline"});
+  }
+}
+
+function precisionRecall(svg, data, baseline) {
+  axes(svg, "Recall", "Precision");
+  for (let i = 0; i <= 4; i++) node(svg, "text", {x: 48 + i * 94, y: 228, "text-anchor": "middle"}, `${i * 25}%`);
+  if (baseline != null) node(svg, "line", {x1: 48, y1: 210 - baseline * 180, x2: 424, y2: 210 - baseline * 180, class: "baseline"});
+  if (data.length) node(svg, "polyline", {points: data.map(item => `${48 + item.recall * 376},${210 - item.precision * 180}`).join(" "), class: "data"});
+}
+
+try {
+  const data = await getResults();
+  $("title").textContent = data.pattern;
+  $("subtitle").textContent = `${data.case_label} · ${data.reviewer}`;
+  $("precision").textContent = pct(data.precision_at_20);
+  $("precisionNote").textContent = `Based on ${data.precision_n} assessable highest-activation patches.`;
+  $("auprc").textContent = num(data.auprc);
+  $("baseline").textContent = `Chance reference (prevalence): ${pct(data.prevalence)}`;
+  $("completed").textContent = `${data.completed}/${data.total}`;
+  $("pattern").textContent = data.pattern;
+  $("meta").textContent = `Discovery assessment: ${data.assessment.replace("_", " ")} · confidence: ${data.confidence}`;
+  activation($("activation"), data.activation_curve, data.prevalence);
+  $("activation").nextElementSibling.textContent = "Darker blue indicates higher activation. Dashed gray line shows overall validation prevalence.";
+  precisionRecall($("pr"), data.pr_curve, data.prevalence);
+  const colors = {present: "#087f5b", absent: "#c33b48", uncertain: "#d89016", cannot_assess: "#8993a5", unreviewed: "#dfe4ec"};
+  for (const [key, color] of Object.entries(colors)) {
+    const count = data.judgment_counts[key];
+    if (!count) continue;
+    const segment = document.createElement("span");
+    segment.style.cssText = `width:${100 * count / data.total}%;background:${color}`;
+    segment.title = `${key}: ${count}`;
+    $("distribution").append(segment);
+    $("distributionLegend").insertAdjacentHTML("beforeend", `<span><i class="dot" style="background:${color}"></i>${key.replace("_", " ")} · ${count}</span>`);
+  }
+} catch (error) {
+  $("root").innerHTML = '<div class="card error">These results could not be loaded.</div>';
+}
