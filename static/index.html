@@ -154,10 +154,9 @@
             </select>
             <label class="form-label" for="studyPattern">Prevalent pattern</label>
             <textarea id="studyPattern" rows="3" maxlength="1000" placeholder="Example: adipose tissue with large clear vacuoles" required></textarea>
-            <fieldset class="confidence-group" id="studyConfidence"><legend>How confident are you in this description?</legend>
-              <label><input type="radio" name="study-confidence" value="high"><span><b>High</b><small>Clear and specific</small></span></label>
-              <label><input type="radio" name="study-confidence" value="medium" checked><span><b>Medium</b><small>Reasonably clear</small></span></label>
-              <label><input type="radio" name="study-confidence" value="low"><span><b>Low</b><small>Only partly clear</small></span></label>
+            <fieldset class="confidence-group" id="studyConfidence"><legend>Confidence in this description</legend>
+              <div class="confidence-buttons"><button type="button" class="confidence-choice low" data-value="low">Low</button><button type="button" class="confidence-choice medium selected" data-value="medium">Medium</button><button type="button" class="confidence-choice high" data-value="high">High</button></div>
+              <input type="hidden" id="studyConfidenceValue" value="medium" />
             </fieldset>
             <button class="btn study-start" id="studyStart" type="submit">Start blinded patch review</button>
             <p id="studyStartStatus" class="study-status" role="status"></p>

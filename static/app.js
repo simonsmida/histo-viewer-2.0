@@ -207,7 +207,7 @@ function resetReviewForGroup() {
 }
 
 const studyUI = Object.fromEntries(["studyDiscoveryGrid", "studyStartForm", "studyReviewer", "studyAssessment",
-  "studyPattern", "studyConfidence", "studyStart", "studyStartStatus"].map(id => [id, document.getElementById(id)]));
+  "studyPattern", "studyConfidenceValue", "studyStart", "studyStartStatus"].map(id => [id, document.getElementById(id)]));
 
 async function loadStudyDiscovery() {
   if (!state.currentCase || !state.currentConcept || !studyUI.studyDiscoveryGrid) return;
@@ -246,7 +246,7 @@ studyUI.studyStartForm.addEventListener("submit", async event => {
     const study = await fetchJson("/api/studies", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({
       case_id: state.currentCase.id, concept_id: state.currentConcept.id,
       reviewer: studyUI.studyReviewer.value, assessment: studyUI.studyAssessment.value, pattern: studyUI.studyPattern.value,
-      confidence: studyUI.studyConfidence.querySelector("input:checked")?.value || "medium",
+      confidence: studyUI.studyConfidenceValue.value || "medium",
     })});
     window.location.href = `/study/review?id=${encodeURIComponent(study.id)}`;
   } catch (error) {
@@ -256,6 +256,11 @@ studyUI.studyStartForm.addEventListener("submit", async event => {
     studyUI.studyStart.disabled = false;
   }
 });
+
+document.querySelectorAll(".confidence-choice").forEach(button => button.addEventListener("click", () => {
+  document.querySelectorAll(".confidence-choice").forEach(option => option.classList.toggle("selected", option === button));
+  studyUI.studyConfidenceValue.value = button.dataset.value;
+}));
 
 for (const [id, kind] of [["patchSupports", "support"], ["patchContradicts", "contradict"]]) {
   document.getElementById(id).addEventListener("click", () => {

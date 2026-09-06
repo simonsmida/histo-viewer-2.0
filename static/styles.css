@@ -826,3 +826,10 @@ body {
 .confidence-group input { margin-right: 4px; accent-color: var(--accent); }
 .study-start { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; min-height: 44px; box-shadow: 0 2px 5px rgba(37,99,235,.2); }
 .study-start:hover { background: #1d4ed8; border-color: #1d4ed8; }
+.confidence-buttons { display: flex; gap: 8px; }
+.confidence-group { display: block; }
+.confidence-choice { flex: 1; border: 1px solid var(--border); border-radius: 5px; padding: 10px 8px; background: #fff; color: var(--text-secondary); font: inherit; font-size: 12px; font-weight: 650; cursor: pointer; }
+.confidence-choice.low { border-bottom: 3px solid #d99000; }
+.confidence-choice.medium { border-bottom: 3px solid #4b83d1; }
+.confidence-choice.high { border-bottom: 3px solid #2f9e6f; }
+.confidence-choice.selected { color: var(--text-primary); background: var(--accent-light); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
