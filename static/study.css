@@ -53,6 +53,7 @@
 .review-overview-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .review-overview h2 { margin: 0; font-size: 17px; }
 .review-overview-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+.metric-note + .metric-note { margin-top: 4px; }
 .answer-actions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
 .answer-actions .btn { flex: 1; min-width: 0; }
 .results-help { color: var(--muted); font-size: 11px; margin: 7px 0 0; text-align: right; }

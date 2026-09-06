@@ -66,9 +66,13 @@ try {
   $("title").textContent = `Pattern: ${data.pattern}`;
   $("subtitle").textContent = `${data.case_label} · ${data.reviewer}`;
   $("topHighPrecision").textContent = pct(data.precision_top_high);
-  $("topHighPrecisionNote").textContent = `Based on ${data.precision_top_high_n} patches in the High and Top strata.`;
+  $("topHighPrecisionNote").textContent = `Present / binary High+Top = ${data.precision_top_high_present_n} / ${data.precision_top_high_n}.`;
   $("auprc").textContent = num(data.auprc);
-  $("baseline").textContent = `Chance reference (prevalence): ${pct(data.prevalence)}`;
+  const precisionTerms = data.auprc_precision_values.map(value => value.toFixed(3)).join(" + ");
+  $("auprcFormula").textContent = data.auprc == null ? "No Present patches yet." : `(${precisionTerms}) / ${data.auprc_precision_values.length} = ${num(data.auprc)}`;
+  const presentCount = data.judgment_counts.present || 0;
+  const binaryCount = presentCount + (data.judgment_counts.absent || 0);
+  $("prevalenceFormula").textContent = binaryCount ? `Prevalence: Present / binary = ${presentCount} / ${binaryCount} = ${pct(data.prevalence)}.` : "Prevalence: no Present/Absent judgments yet.";
   $("completed").textContent = `${data.completed}/${data.total}`;
   $("pattern").textContent = data.pattern;
   $("meta").textContent = `Discovery assessment: ${data.assessment.replace("_", " ")} · confidence: ${data.confidence}`;

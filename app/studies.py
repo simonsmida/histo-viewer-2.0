@@ -216,6 +216,13 @@ def study_results(record: dict) -> dict:
     ap, curve = average_precision(pairs)
     top = sorted(assessable, key=lambda x: x["score"], reverse=True)[:20]
     top_high = [x for x in assessable if x["stratum"] in {"top", "high"}]
+    ordered_pairs = sorted(pairs, key=lambda x: x[0], reverse=True)
+    true_positive_count = 0
+    auprc_precision_values = []
+    for rank, (_, label) in enumerate(ordered_pairs, 1):
+        true_positive_count += label
+        if label:
+            auprc_precision_values.append(true_positive_count / rank)
     counts = {name: {"present": 0, "absent": 0, "uncertain": 0, "cannot_assess": 0} for name in STRATA}
     all_counts = {key: 0 for key in ("present", "absent", "uncertain", "cannot_assess", "unreviewed")}
     for item in record["evaluation"]:
@@ -234,6 +241,8 @@ def study_results(record: dict) -> dict:
         "precision_n": len(top),
         "precision_top_high": sum(x["judgment"] == "present" for x in top_high) / len(top_high) if top_high else None,
         "precision_top_high_n": len(top_high),
+        "precision_top_high_present_n": sum(x["judgment"] == "present" for x in top_high),
+        "auprc_precision_values": auprc_precision_values,
         "auprc": ap, "prevalence": sum(y for _, y in pairs) / len(pairs) if pairs else None,
         "pr_curve": curve, "activation_curve": activation, "judgment_counts": all_counts,
         "sampling": record["sampling"],
