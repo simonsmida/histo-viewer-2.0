@@ -35,6 +35,7 @@ function render() {
   $("next").disabled = saving || index === study.total - 1;
   $("next").textContent = "Next →";
   $("viewResults").disabled = study.completed < study.total || saving;
+  $("resultsHelp").textContent = study.completed < study.total ? "Complete all patches to view results." : "Study complete. Results are ready.";
   renderReviewGrid();
   requestAnimationFrame(updateContextLinks);
 }
@@ -148,11 +149,12 @@ $("viewResults").addEventListener("click", () => {
 });
 $("toggleReviewGrid").addEventListener("click", () => {
   const grid = $("reviewGrid");
+  const overview = $("reviewOverview");
   const button = $("toggleReviewGrid");
-  const hidden = !grid.hidden;
-  grid.hidden = hidden;
-  button.textContent = hidden ? "Show patches" : "Hide patches";
-  button.setAttribute("aria-expanded", String(!hidden));
+  const hidden = overview.hidden;
+  overview.hidden = !hidden;
+  button.textContent = hidden ? "Hide patches" : "Show patches";
+  button.setAttribute("aria-expanded", String(hidden));
 });
 addEventListener("keydown", event => {
   if (["1", "2", "3"].includes(event.key)) choose(["present", "absent", "uncertain"][Number(event.key) - 1]);

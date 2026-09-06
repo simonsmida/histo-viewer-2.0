@@ -44,16 +44,17 @@
           <button class="btn btn-secondary" id="toggleReviewGrid" type="button" aria-expanded="false">Show patches</button>
           <button class="btn btn-success" id="viewResults" disabled>View results</button>
         </div>
+        <p class="results-help" id="resultsHelp">Complete all patches to view results.</p>
       </aside>
     </div>
-    <section class="card review-overview" aria-labelledby="reviewOverviewTitle">
+    <section class="card review-overview" id="reviewOverview" aria-labelledby="reviewOverviewTitle" hidden>
       <div class="review-overview-head">
         <div>
           <h2 id="reviewOverviewTitle">Reviewed patches</h2>
           <p>All sampled patches and your assessments.</p>
         </div>
       </div>
-      <div class="review-grid" id="reviewGrid" hidden></div>
+      <div class="review-grid" id="reviewGrid"></div>
     </section>
   </main>
   <script type="module" src="/static/study-review.js"></script>
