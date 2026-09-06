@@ -28,7 +28,7 @@
 .answer-help { color: var(--muted); font-size: 11px; font-weight: 400; margin-top: 2px; line-height: 1.35; }
 .answer.selected .answer-help { color: #47658f; }
 .choice-reminder { min-height: 18px; color: var(--muted); font-size: 11px; margin: 9px 0 0; }
-.context-links { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 1; }
+.context-links { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 3; }
 .context-links line { stroke: #2563eb; stroke-width: 1.5; stroke-dasharray: 5 4; opacity: .8; }
 .navigation .btn { min-height: 42px; font-weight: 650; }
 .navigation .btn-primary { flex: 1; }
