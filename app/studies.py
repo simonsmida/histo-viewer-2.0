@@ -32,7 +32,7 @@ STRATA = ("zero", "low", "medium", "high", "top")
 class StudyCreate(BaseModel):
     case_id: str
     concept_id: str
-    reviewer: str = Field(min_length=1, max_length=120)
+    reviewer: str = Field(default="expert", min_length=1, max_length=120)
     assessment: Literal["clear", "partial", "no_pattern", "artifact", "unsure"]
     pattern: str = Field(default="", max_length=1000)
     confidence: Literal["low", "medium", "high"]

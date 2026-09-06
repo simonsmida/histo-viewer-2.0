@@ -206,7 +206,7 @@ function resetReviewForGroup() {
   loadStudyDiscovery();
 }
 
-const studyUI = Object.fromEntries(["studyDiscoveryGrid", "studyStartForm", "studyReviewer", "studyAssessment",
+const studyUI = Object.fromEntries(["studyDiscoveryGrid", "studyStartForm", "studyAssessment",
   "studyPattern", "studyConfidence", "studyStart", "studyStartStatus"].map(id => [id, document.getElementById(id)]));
 
 async function loadStudyDiscovery() {
@@ -223,7 +223,7 @@ async function loadStudyDiscovery() {
     studyUI.studyDiscoveryGrid.innerHTML = data.patches.map(p =>
       `<img src="${p.thumbnail_url}" alt="Discovery example ${p.rank}" loading="lazy" />`).join("");
     studyUI.studyStart.disabled = false;
-    studyUI.studyStartStatus.textContent = `${data.patches.length} discovery patches · excluded from validation`;
+    studyUI.studyStartStatus.textContent = "";
   } catch (error) {
     studyUI.studyDiscoveryGrid.innerHTML = '<p class="study-empty">Discovery examples could not be loaded.</p>';
     studyUI.studyStartStatus.textContent = "";
@@ -245,8 +245,8 @@ studyUI.studyStartForm.addEventListener("submit", async event => {
   try {
     const study = await fetchJson("/api/studies", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({
       case_id: state.currentCase.id, concept_id: state.currentConcept.id,
-      reviewer: studyUI.studyReviewer.value, assessment: studyUI.studyAssessment.value,
-      pattern: studyUI.studyPattern.value, confidence: studyUI.studyConfidence.value,
+      assessment: studyUI.studyAssessment.value, pattern: studyUI.studyPattern.value,
+      confidence: studyUI.studyConfidence.querySelector("input:checked")?.value || "medium",
     })});
     window.location.href = `/study/review?id=${encodeURIComponent(study.id)}`;
   } catch (error) {
