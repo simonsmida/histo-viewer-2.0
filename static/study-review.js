@@ -37,7 +37,7 @@ function render() {
 function updateContextLinks() {
   const pane = document.querySelector(".patch-pane");
   const context = $("contextImage");
-  const patch = $("patchImage");
+  const patch = document.querySelector(".patch-focus");
   const svg = $("contextLinks");
   if (!pane || !context || !patch || !svg || !context.getBoundingClientRect().width) return;
   const details = document.querySelector(".context-details");
