@@ -40,6 +40,9 @@ function updateContextLinks() {
   const patch = $("patchImage");
   const svg = $("contextLinks");
   if (!pane || !context || !patch || !svg || !context.getBoundingClientRect().width) return;
+  const details = document.querySelector(".context-details");
+  if (details && !details.open) { svg.style.display = "none"; return; }
+  svg.style.display = "block";
   const paneRect = pane.getBoundingClientRect();
   const c = context.getBoundingClientRect();
   const p = patch.getBoundingClientRect();
@@ -104,3 +107,4 @@ try {
 addEventListener("resize", updateContextLinks);
 $("contextImage")?.addEventListener("load", updateContextLinks);
 $("patchImage")?.addEventListener("load", updateContextLinks);
+document.querySelector(".context-details")?.addEventListener("toggle", updateContextLinks);
