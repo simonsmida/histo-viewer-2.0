@@ -14,14 +14,17 @@
     </header>
     <div class="review-layout">
       <section class="card patch-pane">
-        <figure class="context-figure">
-          <img id="contextImage" alt="Broader tissue area with the assessed patch outlined in blue">
-          <figcaption>Broader tissue context · assessed area outlined in blue</figcaption>
-        </figure>
-        <div class="patch-inset">
+        <figure class="patch-focus">
           <img id="patchImage" alt="Magnified view of the assessed patch">
-          <div><strong>Assessed patch</strong><span>Magnified view of the outlined area</span></div>
-        </div>
+          <figcaption>Patch to assess</figcaption>
+        </figure>
+        <details class="context-details">
+          <summary>Show broader tissue context</summary>
+          <figure class="context-figure">
+            <img id="contextImage" alt="Broader tissue area with the assessed patch outlined in blue">
+            <figcaption>Broader context · assessed area outlined in blue</figcaption>
+          </figure>
+        </details>
         <p class="patch-number" id="patchNumber"></p>
       </section>
       <aside class="card answer-pane">

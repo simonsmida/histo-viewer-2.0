@@ -5,14 +5,15 @@
 .step-title { color: var(--muted); font-size: 12px; margin-top: 2px; }
 .review-layout { grid-template-columns: minmax(600px, 1fr) 370px; align-items: start; }
 .patch-pane { padding: 20px; }
+.patch-focus { margin: 0; }
+.patch-focus img { display: block; width: min(100%, 560px); aspect-ratio: 1; object-fit: contain; margin: 0 auto; background: #f7f7f7; border-radius: 6px; }
+.patch-focus figcaption { color: var(--ink); font-size: 13px; font-weight: 700; margin-top: 9px; text-align: center; }
+.context-details { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 12px; text-align: left; }
+.context-details summary { color: var(--blue); cursor: pointer; font-size: 12px; font-weight: 650; user-select: none; }
+.context-details[open] summary { margin-bottom: 10px; }
 .context-figure { margin: 0; }
-.context-figure img { width: 100%; max-height: calc(100vh - 190px); aspect-ratio: 1; object-fit: contain; }
+.context-figure img { display: block; width: min(100%, 360px); max-height: 360px; aspect-ratio: 1; object-fit: contain; margin: 0 auto; }
 .context-figure figcaption { color: var(--muted); font-size: 12px; margin-top: 7px; text-align: left; }
-.patch-inset { display: flex; align-items: center; gap: 12px; margin-top: 15px; padding: 10px; border: 1px solid var(--line); border-radius: 7px; text-align: left; }
-.patch-inset img { width: 84px; height: 84px; flex: 0 0 84px; }
-.patch-inset strong, .patch-inset span { display: block; }
-.patch-inset strong { font-size: 14px; }
-.patch-inset span { color: var(--muted); font-size: 12px; margin-top: 3px; }
 .pattern { padding: 0; overflow: hidden; }
 .pattern span, .pattern strong { display: block; }
 .pattern span { padding: 8px 12px; color: var(--muted); font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--line); }
@@ -34,5 +35,5 @@
   .context-figure img { max-height: none; }
 }
 @media(max-width: 560px) {
-  .patch-inset img { width: 68px; height: 68px; flex-basis: 68px; }
+  .patch-focus img { width: 100%; }
 }

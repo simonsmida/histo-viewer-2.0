@@ -13,7 +13,9 @@ async function request(url, options) {
 
 function render() {
   const item = study.evaluation[index];
-  pendingChoice = item.judgment;
+  // Keep a newly selected answer visible until it is persisted. Resetting this
+  // from the server record here made Save and next appear to do nothing.
+  if (!saving) pendingChoice = item.judgment;
   $("pattern").textContent = study.pattern;
   $("patchImage").src = item.image_url;
   $("contextImage").src = item.context_url;
