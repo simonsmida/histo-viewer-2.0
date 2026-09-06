@@ -33,7 +33,7 @@ class StudyTests(unittest.TestCase):
         public = studies.create_study(studies.StudyCreate(
             case_id="case-01", concept_id="concept-0001", reviewer="P1",
             assessment="clear", pattern="adipose tissue", confidence="high"))
-        self.assertEqual(set(public["evaluation"][0]), {"position", "judgment", "image_url"})
+        self.assertEqual(set(public["evaluation"][0]), {"position", "judgment", "image_url", "context_url"})
         record = studies._load(public["id"])
         self.assertFalse(set(range(studies.DISCOVERY_COUNT)) & {x["patch_index"] for x in record["evaluation"]})
         self.assertEqual({x["stratum"] for x in record["evaluation"]}, set(studies.STRATA))
