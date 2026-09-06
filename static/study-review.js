@@ -32,9 +32,45 @@ function render() {
   });
   $("choiceReminder").textContent = pendingChoice ? "Saved." : "Answers save automatically.";
   $("previous").disabled = index === 0 || saving;
-  $("next").disabled = saving;
-  $("next").textContent = index === study.total - 1 ? "View results" : "Next";
+  $("next").disabled = saving || index === study.total - 1;
+  $("next").textContent = "Next";
+  $("viewResults").disabled = study.completed < study.total || saving;
+  renderReviewGrid();
   requestAnimationFrame(updateContextLinks);
+}
+
+function renderReviewGrid() {
+  const grid = $("reviewGrid");
+  if (!grid || !study) return;
+  grid.replaceChildren();
+  study.evaluation.forEach((item, itemIndex) => {
+    const tile = document.createElement("button");
+    tile.type = "button";
+    tile.className = `review-tile${itemIndex === index ? " current" : ""}`;
+    tile.setAttribute("aria-label", `Patch ${itemIndex + 1}: ${item.judgment || "not assessed"}`);
+    if (itemIndex === index) tile.setAttribute("aria-current", "true");
+    const image = document.createElement("img");
+    image.src = item.image_url;
+    image.alt = `Patch ${itemIndex + 1}`;
+    const meta = document.createElement("span");
+    meta.className = "review-tile-meta";
+    const number = document.createElement("span");
+    number.className = "review-tile-number";
+    number.textContent = String(itemIndex + 1);
+    const judgment = item.judgment || "unanswered";
+    const status = document.createElement("span");
+    status.className = `review-tile-status ${judgment}`;
+    status.textContent = item.judgment ? item.judgment[0].toUpperCase() + item.judgment.slice(1) : "Not assessed";
+    meta.append(number, status);
+    tile.append(image, meta);
+    tile.addEventListener("click", () => {
+      if (saving) return;
+      index = itemIndex;
+      $("saveState").textContent = "";
+      render();
+    });
+    grid.append(tile);
+  });
 }
 
 function updateContextLinks() {
@@ -103,7 +139,10 @@ $("previous").addEventListener("click", () => { if (index > 0 && !saving) { inde
 $("next").addEventListener("click", () => {
   if (saving) return;
   if (index < study.total - 1) { index += 1; render(); }
-  else location.href = `/study/results?id=${encodeURIComponent(id)}`;
+});
+$("viewResults").addEventListener("click", () => {
+  if (!study || saving || study.completed < study.total) return;
+  location.href = `/study/results?id=${encodeURIComponent(id)}`;
 });
 addEventListener("keydown", event => {
   if (["1", "2", "3"].includes(event.key)) choose(["present", "absent", "uncertain"][Number(event.key) - 1]);
