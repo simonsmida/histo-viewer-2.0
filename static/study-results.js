@@ -65,9 +65,8 @@ try {
   const data = await getResults();
   $("title").textContent = `Pattern: ${data.pattern}`;
   $("subtitle").textContent = `${data.case_label} · ${data.reviewer}`;
-  $("prevalence").textContent = pct(data.prevalence);
-  const binaryCount = (data.judgment_counts.present || 0) + (data.judgment_counts.absent || 0);
-  $("prevalenceNote").textContent = `Based on ${binaryCount} patches marked Present or Absent.`;
+  $("topHighPrecision").textContent = pct(data.precision_top_high);
+  $("topHighPrecisionNote").textContent = `Based on ${data.precision_top_high_n} patches in the High and Top strata.`;
   $("auprc").textContent = num(data.auprc);
   $("baseline").textContent = `Chance reference (prevalence): ${pct(data.prevalence)}`;
   $("completed").textContent = `${data.completed}/${data.total}`;
