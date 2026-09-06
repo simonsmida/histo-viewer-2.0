@@ -63,7 +63,7 @@ function precisionRecall(svg, data, baseline) {
 
 try {
   const data = await getResults();
-  $("title").textContent = data.pattern;
+  $("title").textContent = `Pattern: ${data.pattern}`;
   $("subtitle").textContent = `${data.case_label} · ${data.reviewer}`;
   $("precision").textContent = pct(data.precision_at_20);
   $("precisionNote").textContent = `Based on ${data.precision_n} assessable highest-activation patches.`;
