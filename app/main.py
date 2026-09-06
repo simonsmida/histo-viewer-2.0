@@ -23,6 +23,7 @@ from .catalog import (
     list_concepts,
 )
 from .reviews import router as review_router
+from .studies import router as study_router
 from .patches import crop_patch, patch_image_source, physical_pixel_size
 
 
@@ -33,6 +34,7 @@ ANNOTATIONS_DIR.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="Histo Viewer 2.0 — Review prototype")
 app.include_router(review_router)
+app.include_router(study_router)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
@@ -107,6 +109,16 @@ def index() -> HTMLResponse:
         revision = hashlib.sha256((STATIC_DIR / asset).read_bytes()).hexdigest()[:16]
         html = html.replace(f'"/static/{asset}"', f'"/static/{asset}?v={revision}"')
     return HTMLResponse(html, headers=NO_STORE_HEADERS)
+
+
+@app.get("/study/review")
+def study_review_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "study-review.html", headers=NO_STORE_HEADERS)
+
+
+@app.get("/study/results")
+def study_results_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "study-results.html", headers=NO_STORE_HEADERS)
 
 
 @app.get("/api/health")

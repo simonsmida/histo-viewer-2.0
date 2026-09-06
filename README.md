@@ -44,6 +44,18 @@ This updates local data, including annotations. It excludes redundant pyramids g
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
+### Expert study prototype
+
+Open **Expert study** after choosing an image and patch group. The strongest 12
+patches form a discovery set for writing one prevalent-pattern description. The
+app then opens a separate blinded review of patches sampled across five frozen
+activation strata. Results report Precision@20, AUPRC with its prevalence
+reference, the activation curve, and all response counts.
+
+Study sessions are stored as append-only local research data under
+`review-data/studies/`, which is ignored by Git. Evaluation responses never
+contain activation values, strata, ranks, coordinates, or the feature ID.
+
 Open http://localhost:8000. `python run.py` is an alternative that listens on all network interfaces, port 8000.
 
 ## Run with Docker

@@ -809,3 +809,10 @@ body {
 .selected-patch-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 16px 12px; font-size: 12px; color: var(--text-secondary); }
 
 .selected-patch-actions.is-hidden { visibility: hidden; pointer-events: none; }
+
+.study-kicker { color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.study-intro, .study-status, .study-muted { color: var(--text-secondary); font-size: 12px; line-height: 1.5; margin: 8px 0 14px; }
+.study-discovery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; min-height: 72px; margin-bottom: 14px; }
+.study-discovery-grid img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 3px; background: var(--bg-surface-alt); }
+.study-empty { grid-column: 1/-1; padding: 12px; color: var(--text-secondary); background: var(--bg-surface-alt); border-radius: 5px; font-size: 12px; }
+.study-start { width: 100%; margin-top: 16px; }

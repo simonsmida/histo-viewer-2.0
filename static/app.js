@@ -203,7 +203,57 @@ function resetReviewForGroup() {
   reviewUI.reviewHeading.textContent = `${state.currentCase.label} · ${patchGroupLabel(state.currentConcept)}`;
   renderReviewExamples();
   refreshReviewHistory();
+  loadStudyDiscovery();
 }
+
+const studyUI = Object.fromEntries(["studyDiscoveryGrid", "studyStartForm", "studyReviewer", "studyAssessment",
+  "studyPattern", "studyConfidence", "studyStart", "studyStartStatus"].map(id => [id, document.getElementById(id)]));
+
+async function loadStudyDiscovery() {
+  if (!state.currentCase || !state.currentConcept || !studyUI.studyDiscoveryGrid) return;
+  studyUI.studyDiscoveryGrid.innerHTML = '<p class="study-muted">Loading discovery examples…</p>';
+  studyUI.studyStart.disabled = true;
+  try {
+    const data = await fetchJson(`/api/study/discovery/${state.currentCase.id}/${state.currentConcept.id}`);
+    if (!data.eligible) {
+      studyUI.studyDiscoveryGrid.innerHTML = '<p class="study-empty">This group has too few positive patches for a separate discovery and validation set.</p>';
+      studyUI.studyStartStatus.textContent = "Choose a group with at least 20 patches.";
+      return;
+    }
+    studyUI.studyDiscoveryGrid.innerHTML = data.patches.map(p =>
+      `<img src="${p.thumbnail_url}" alt="Discovery example ${p.rank}" loading="lazy" />`).join("");
+    studyUI.studyStart.disabled = false;
+    studyUI.studyStartStatus.textContent = `${data.patches.length} discovery patches · excluded from validation`;
+  } catch (error) {
+    studyUI.studyDiscoveryGrid.innerHTML = '<p class="study-empty">Discovery examples could not be loaded.</p>';
+    studyUI.studyStartStatus.textContent = "";
+  }
+}
+
+studyUI.studyAssessment.addEventListener("change", () => {
+  const needsPattern = ["clear", "partial"].includes(studyUI.studyAssessment.value);
+  studyUI.studyPattern.required = needsPattern;
+  studyUI.studyPattern.disabled = !needsPattern;
+  if (!needsPattern) studyUI.studyPattern.value = "";
+});
+
+studyUI.studyStartForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  if (!state.currentCase || !state.currentConcept) return;
+  studyUI.studyStart.disabled = true;
+  studyUI.studyStartStatus.textContent = "Preparing blinded validation set…";
+  try {
+    const study = await fetchJson("/api/studies", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({
+      case_id: state.currentCase.id, concept_id: state.currentConcept.id,
+      reviewer: studyUI.studyReviewer.value, assessment: studyUI.studyAssessment.value,
+      pattern: studyUI.studyPattern.value, confidence: studyUI.studyConfidence.value,
+    })});
+    window.location.href = `/study/review?id=${encodeURIComponent(study.id)}`;
+  } catch (error) {
+    studyUI.studyStartStatus.textContent = error.message.includes("422") ? "Check the entries and choose a group with enough patches." : "The study could not be created.";
+    studyUI.studyStart.disabled = false;
+  }
+});
 
 for (const [id, kind] of [["patchSupports", "support"], ["patchContradicts", "contradict"]]) {
   document.getElementById(id).addEventListener("click", () => {

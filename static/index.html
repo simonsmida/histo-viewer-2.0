@@ -95,7 +95,7 @@
       <div class="panel-tab-bar">
         <button class="panel-tab active" data-tab="patches">Patches</button>
         <button class="panel-tab" data-tab="annotations">Annotations</button>
-        <button class="panel-tab" data-tab="review">Review</button>
+        <button class="panel-tab" data-tab="review">Expert study</button>
       </div>
 
       <div class="panel-section active" data-tab="patches">
@@ -139,7 +139,31 @@
 
       <div class="panel-section" data-tab="review">
         <div class="panel-section-body review-panel">
-          <p class="prototype-note">Review prototype · for testing</p>
+          <p class="study-kicker">Local research prototype</p>
+          <h2>Describe the prevalent pattern</h2>
+          <p class="study-intro">Review the strongest examples here and their locations in the image. Then describe one pattern to test on unseen patches.</p>
+          <div id="studyDiscoveryGrid" class="study-discovery-grid" aria-live="polite"></div>
+          <form id="studyStartForm">
+            <label class="form-label" for="studyReviewer">Your name or initials</label>
+            <input id="studyReviewer" maxlength="120" required autocomplete="off" />
+            <label class="form-label" for="studyAssessment">Is there a recognizable prevalent pattern?</label>
+            <select id="studyAssessment" class="styled-select">
+              <option value="clear">Yes, clear</option>
+              <option value="partial">Yes, but only in some patches</option>
+              <option value="no_pattern">No consistent pattern</option>
+              <option value="artifact">Mostly technical artifact</option>
+              <option value="unsure">Unsure</option>
+            </select>
+            <label class="form-label" for="studyPattern">Prevalent pattern</label>
+            <textarea id="studyPattern" rows="3" maxlength="1000" placeholder="Example: adipose tissue with large clear vacuoles" required></textarea>
+            <label class="form-label" for="studyConfidence">Confidence</label>
+            <select id="studyConfidence" class="styled-select">
+              <option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option>
+            </select>
+            <button class="btn study-start" id="studyStart" type="submit">Start blinded patch review</button>
+            <p id="studyStartStatus" class="study-status" role="status"></p>
+          </form>
+          <div class="legacy-review" hidden>
           <h2 id="reviewHeading">Review this patch group</h2>
           <form id="reviewForm">
             <label class="form-label" for="reviewerName">Your name or initials</label>
@@ -163,6 +187,7 @@
           </form>
           <h3>Saved reviews for this group</h3>
           <div id="reviewHistory"></div>
+          </div>
         </div>
       </div>
 
