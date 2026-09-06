@@ -5,11 +5,11 @@
 .step-title { color: var(--muted); font-size: 12px; margin-top: 2px; }
 .review-layout { grid-template-columns: minmax(600px, 1fr) 370px; align-items: start; }
 .patch-pane { padding: 20px; display: grid; grid-template-columns: minmax(360px, 1fr) minmax(200px, 260px); gap: 24px; align-items: center; position: relative; }
-.patch-focus { margin: 0; grid-column: 2; grid-row: 1; }
+.patch-focus { margin: 0; grid-column: 2; grid-row: 1; position: relative; z-index: 4; }
 .patch-focus img { display: block; width: min(100%, 230px); aspect-ratio: 1; object-fit: contain; margin: 0 auto; background: #f7f7f7; border-radius: 6px; image-rendering: auto; }
 .patch-focus figcaption { color: var(--ink); font-size: 13px; font-weight: 700; margin-top: 9px; text-align: center; }
 .patch-pane .patch-number { grid-column: 1 / -1; margin: 0; }
-.context-details { margin: 0; padding-right: 20px; border-right: 1px solid var(--line); text-align: left; grid-column: 1; grid-row: 1; }
+.context-details { margin: 0; padding-right: 20px; border-right: 1px solid var(--line); text-align: left; grid-column: 1; grid-row: 1; position: relative; z-index: 2; }
 .context-details summary { color: var(--blue); cursor: pointer; font-size: 12px; font-weight: 650; user-select: none; margin-bottom: 10px; }
 .context-details[open] summary { margin-bottom: 10px; }
 .context-figure { margin: 0; }
@@ -28,7 +28,7 @@
 .answer-help { color: var(--muted); font-size: 11px; font-weight: 400; margin-top: 2px; line-height: 1.35; }
 .answer.selected .answer-help { color: #47658f; }
 .choice-reminder { min-height: 18px; color: var(--muted); font-size: 11px; margin: 9px 0 0; }
-.context-links { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 3; }
+.context-links { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 1; }
 .context-links line { stroke: #2563eb; stroke-width: 1.5; stroke-dasharray: 5 4; opacity: .8; }
 .navigation .btn { min-height: 42px; font-weight: 650; }
 .navigation .btn-primary { flex: 1; }

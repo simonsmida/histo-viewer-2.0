@@ -18,12 +18,12 @@
           <summary>Show broader tissue context</summary>
           <figure class="context-figure">
             <img id="contextImage" alt="Broader tissue area with the assessed patch outlined in blue">
-            <figcaption>Broader context · assessed area outlined in blue</figcaption>
+            <figcaption>Context · blue box marks the patch</figcaption>
           </figure>
         </details>
         <figure class="patch-focus">
           <img id="patchImage" alt="Magnified view of the assessed patch">
-          <figcaption>Magnified view of the blue outlined region</figcaption>
+          <figcaption>Patch of interest</figcaption>
         </figure>
         <p class="patch-number" id="patchNumber"></p>
         <svg id="contextLinks" class="context-links" aria-hidden="true"></svg>
@@ -31,13 +31,13 @@
       <aside class="card answer-pane">
         <div class="eyebrow">Your assessment</div>
         <h1>Does this area contain the described pattern?</h1>
-        <div class="pattern"><span>Pattern to look for</span><strong id="pattern"></strong></div>
-        <p class="answer-instruction">Choose the best answer. Your choice is saved when you continue.</p>
+        <div class="pattern"><span>Look for</span><strong id="pattern"></strong></div>
+        <p class="answer-instruction">Choose one answer, then save.</p>
         <div class="answers" id="answers">
-          <button class="answer present" data-value="present"><span class="answer-title">Yes, present</span><span class="answer-help">The pattern is clearly visible.</span></button>
-          <button class="answer absent" data-value="absent"><span class="answer-title">No, absent</span><span class="answer-help">The pattern is clearly not visible.</span></button>
-          <button class="answer uncertain" data-value="uncertain"><span class="answer-title">Uncertain</span><span class="answer-help">It may be present, but I cannot decide confidently.</span></button>
-          <button class="answer cannot" data-value="cannot_assess"><span class="answer-title">Cannot assess</span><span class="answer-help">Image quality or available tissue prevents assessment.</span></button>
+          <button class="answer present" data-value="present"><span class="answer-title">Present</span><span class="answer-help">Clearly visible.</span></button>
+          <button class="answer absent" data-value="absent"><span class="answer-title">Absent</span><span class="answer-help">Clearly not visible.</span></button>
+          <button class="answer uncertain" data-value="uncertain"><span class="answer-title">Uncertain</span><span class="answer-help">Cannot decide.</span></button>
+          <button class="answer cannot" data-value="cannot_assess"><span class="answer-title">Cannot assess</span><span class="answer-help">Not enough usable tissue.</span></button>
         </div>
         <p class="choice-reminder" id="choiceReminder">Select one answer to continue.</p>
         <div class="navigation"><button class="btn" id="previous">Back</button><button class="btn btn-primary" id="next" disabled>Save and next</button></div>
