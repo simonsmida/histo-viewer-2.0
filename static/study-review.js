@@ -104,7 +104,7 @@ document.querySelectorAll(".answer").forEach(button => button.addEventListener("
 $("previous").addEventListener("click", () => { if (index > 0 && !saving) { index -= 1; $("saveState").textContent = ""; render(); } });
 $("next").addEventListener("click", saveAndContinue);
 addEventListener("keydown", event => {
-  if (["1", "2", "3", "4"].includes(event.key)) choose(["present", "absent", "uncertain", "cannot_assess"][Number(event.key) - 1]);
+  if (["1", "2", "3"].includes(event.key)) choose(["present", "absent", "uncertain"][Number(event.key) - 1]);
 });
 
 try {
