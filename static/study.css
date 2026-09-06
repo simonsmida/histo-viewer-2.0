@@ -11,7 +11,10 @@
 .patch-focus figcaption { color: var(--ink); font-size: 13px; font-weight: 700; margin-top: 9px; text-align: center; }
 .patch-pane .patch-number { grid-column: 1 / -1; margin: 0; }
 .context-details { margin: 0; min-height: 470px; padding-right: 20px; border-right: 1px solid var(--line); text-align: left; grid-column: 1; grid-row: 1; position: relative; z-index: 2; }
+.context-details { height: 470px; overflow: hidden; }
 .context-details summary { color: var(--blue); cursor: pointer; font-size: 12px; font-weight: 650; user-select: none; margin-bottom: 10px; }
+.context-options { display: inline-flex; gap: 12px; margin-left: 16px; color: var(--muted); font-size: 11px; vertical-align: middle; }
+.context-options input { accent-color: var(--blue); }
 .context-details[open] summary { margin-bottom: 10px; }
 .context-figure { margin: 0; }
 .context-figure img { display: block; width: min(100%, 420px); max-height: 420px; aspect-ratio: 1; object-fit: contain; margin: 0 auto; }
@@ -31,6 +34,7 @@
 .choice-reminder { min-height: 18px; color: var(--muted); font-size: 11px; margin: 9px 0 0; }
 .context-links { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 3; }
 .context-links line { stroke: #2563eb; stroke-width: 1.5; stroke-dasharray: 5 4; opacity: .8; }
+.patch-frame.without-outline { border-color: transparent; }
 .navigation .btn { min-height: 42px; font-weight: 650; }
 .navigation .btn-primary { flex: 1; }
 @media(max-width: 900px) {
@@ -42,6 +46,7 @@
 @media(max-width: 560px) {
   .patch-pane { display: block; }
   .context-details { min-height: 0; margin-top: 18px; padding: 12px 0 0; border-right: 0; border-top: 1px solid var(--line); }
+  .context-details { height: auto; overflow: visible; }
   .patch-focus { margin-top: 14px; }
   .patch-frame { width: min(100%, 230px); }
 }

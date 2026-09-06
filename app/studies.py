@@ -185,6 +185,7 @@ def public_study(record: dict) -> dict:
             "position": x["position"], "judgment": x["judgment"],
             "image_url": f"/api/studies/{record['id']}/patches/{x['position']}.png",
             "context_url": f"/api/studies/{record['id']}/patches/{x['position']}/context.png",
+            "context_plain_url": f"/api/studies/{record['id']}/patches/{x['position']}/context-plain.png",
             "context_box": x.get("context_box", {"left": .4, "top": .4, "width": .2, "height": .2}),
         } for x in items],
     }
@@ -276,13 +277,18 @@ def api_study_patch_context(study_id: str, position: int) -> Response:
     return _study_patch_response(study_id, position, context=5)
 
 
-def _study_patch_response(study_id: str, position: int, *, context: int) -> Response:
+@router.get("/api/studies/{study_id}/patches/{position}/context-plain.png")
+def api_study_patch_context_plain(study_id: str, position: int) -> Response:
+    return _study_patch_response(study_id, position, context=5, outline=False)
+
+
+def _study_patch_response(study_id: str, position: int, *, context: int, outline: bool = True) -> Response:
     record = _load(study_id)
     if not 1 <= position <= len(record["evaluation"]):
         raise HTTPException(404, "Unknown evaluation patch")
     item = record["evaluation"][position - 1]
     case = get_case(record["case_id"])
     patch = SimpleNamespace(source_x=item["source_x"], source_y=item["source_y"])
-    image, _ = crop_patch(case, patch, context=context, original_resolution=True)
+    image, _ = crop_patch(case, patch, context=context, original_resolution=True, outline=outline)
     buffer = io.BytesIO(); image.save(buffer, format="PNG", optimize=True)
     return Response(buffer.getvalue(), media_type="image/png", headers={"Cache-Control": "private, max-age=3600"})

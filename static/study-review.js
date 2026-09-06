@@ -18,7 +18,9 @@ function render() {
   if (!saving) pendingChoice = item.judgment;
   $("pattern").textContent = study.pattern;
   $("patchImage").src = item.image_url;
-  $("contextImage").src = item.context_url;
+  const outlines = $("showOutlines")?.checked !== false;
+  $("contextImage").src = outlines ? item.context_url : (item.context_plain_url || item.context_url);
+  $("patchImage").closest(".patch-frame")?.classList.toggle("without-outline", !outlines);
   $("contextImage").dataset.contextBox = JSON.stringify(item.context_box);
   $("patchNumber").textContent = `Patch ${index + 1} of ${study.total}`;
   $("progressText").textContent = `${study.completed} of ${study.total} completed`;
@@ -43,6 +45,7 @@ function updateContextLinks() {
   const details = document.querySelector(".context-details");
   if (details && !details.open) { svg.style.display = "none"; return; }
   svg.style.display = "block";
+  if (!$("showConnectors")?.checked) { svg.style.display = "none"; return; }
   const paneRect = pane.getBoundingClientRect();
   const c = context.getBoundingClientRect();
   const p = patch.getBoundingClientRect();
@@ -57,6 +60,15 @@ function updateContextLinks() {
   svg.setAttribute("viewBox", `0 0 ${pane.clientWidth} ${pane.clientHeight}`);
   svg.setAttribute("width", pane.clientWidth); svg.setAttribute("height", pane.clientHeight);
   svg.innerHTML = from.map((point, i) => `<line x1="${point[0]}" y1="${point[1]}" x2="${to[i][0]}" y2="${to[i][1]}" />`).join("");
+}
+
+function updateStudyDisplay() {
+  if (!study) return;
+  const item = study.evaluation[index];
+  const outlines = $("showOutlines")?.checked !== false;
+  $("contextImage").src = outlines ? item.context_url : item.context_plain_url;
+  $("patchImage").closest(".patch-frame")?.classList.toggle("without-outline", !outlines);
+  updateContextLinks();
 }
 
 function choose(value) {
@@ -108,3 +120,5 @@ addEventListener("resize", updateContextLinks);
 $("contextImage")?.addEventListener("load", updateContextLinks);
 $("patchImage")?.addEventListener("load", updateContextLinks);
 document.querySelector(".context-details")?.addEventListener("toggle", updateContextLinks);
+$("showOutlines")?.addEventListener("change", updateStudyDisplay);
+$("showConnectors")?.addEventListener("change", updateContextLinks);

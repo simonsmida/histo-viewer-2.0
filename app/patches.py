@@ -31,7 +31,7 @@ def physical_pixel_size(case: Case) -> tuple[float, float] | None:
 
 
 def crop_patch(case: Case, patch: Patch, *, context: int = 1,
-               original_resolution: bool = True) -> tuple[Image.Image, bool]:
+               original_resolution: bool = True, outline: bool = True) -> tuple[Image.Image, bool]:
     path, original = patch_image_source(case) if original_resolution else (case.slide_path, False)
     revision = str(path.stat().st_mtime_ns)
     with load_slide(str(path), "RGB", revision) as slide:
@@ -45,7 +45,7 @@ def crop_patch(case: Case, patch: Patch, *, context: int = 1,
         if right <= left or bottom <= top:
             raise HTTPException(404, "Patch is outside the image")
         image = slide.read_region((left, top), (right - left, bottom - top)).convert("RGB")
-    if context > 1:
+    if context > 1 and outline:
         box = (round(patch.source_x * sx) - left, round(patch.source_y * sy) - top,
                round((patch.source_x + case.patch_size) * sx) - left - 1,
                round((patch.source_y + case.patch_size) * sy) - top - 1)
