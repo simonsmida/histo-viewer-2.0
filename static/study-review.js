@@ -29,10 +29,10 @@ function render() {
     button.classList.toggle("selected", button.dataset.value === pendingChoice);
     button.disabled = saving;
   });
-  $("choiceReminder").textContent = pendingChoice ? "Answer selected." : "Select one answer to continue.";
+  $("choiceReminder").textContent = pendingChoice ? "Saved." : "Answers save automatically.";
   $("previous").disabled = index === 0 || saving;
-  $("next").disabled = !pendingChoice || saving;
-  $("next").textContent = index === study.total - 1 ? "Save and view results" : "Save and next";
+  $("next").disabled = saving;
+  $("next").textContent = index === study.total - 1 ? "View results" : "Next";
   requestAnimationFrame(updateContextLinks);
 }
 
@@ -71,38 +71,34 @@ function updateStudyDisplay() {
   updateContextLinks();
 }
 
-function choose(value) {
-  if (saving) return;
+async function choose(value) {
+  if (saving || !study) return;
   pendingChoice = value;
   document.querySelectorAll(".answer").forEach(button => button.classList.toggle("selected", button.dataset.value === value));
-  $("choiceReminder").textContent = "Answer selected.";
-  $("next").disabled = false;
-  $("next").focus();
-}
-
-async function saveAndContinue() {
-  if (!pendingChoice || saving) return;
   saving = true;
-  $("saveState").textContent = "Saving…";
+  $("choiceReminder").textContent = "Saving…";
   render();
   try {
     study = await request(`/api/studies/${id}/judgments/${index + 1}`, {
-      method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify({judgment: pendingChoice}),
+      method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify({judgment: value}),
     });
     $("saveState").textContent = "Saved";
-    if (index < study.total - 1) { index += 1; render(); }
-    else location.href = `/study/results?id=${encodeURIComponent(id)}`;
+    if (index < study.total - 1) { index += 1; pendingChoice = null; }
   } catch (error) {
     $("saveState").textContent = "Could not save. Please try again.";
   } finally {
     saving = false;
-    if (index < study.total) render();
+    render();
   }
 }
 
 document.querySelectorAll(".answer").forEach(button => button.addEventListener("click", () => choose(button.dataset.value)));
 $("previous").addEventListener("click", () => { if (index > 0 && !saving) { index -= 1; $("saveState").textContent = ""; render(); } });
-$("next").addEventListener("click", saveAndContinue);
+$("next").addEventListener("click", () => {
+  if (saving) return;
+  if (index < study.total - 1) { index += 1; render(); }
+  else location.href = `/study/results?id=${encodeURIComponent(id)}`;
+});
 addEventListener("keydown", event => {
   if (["1", "2", "3"].includes(event.key)) choose(["present", "absent", "uncertain"][Number(event.key) - 1]);
 });

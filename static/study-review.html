@@ -14,6 +14,7 @@
     </header>
     <div class="review-layout">
       <section class="card patch-pane">
+        <div class="patch-question">Is pattern present?</div>
         <details class="context-details" open>
           <summary>Broader tissue context</summary>
           <div class="context-options"><label><input id="showGuides" type="checkbox" checked> Blue guides</label></div>
@@ -30,16 +31,15 @@
         <svg id="contextLinks" class="context-links" aria-hidden="true"></svg>
       </section>
       <aside class="card answer-pane">
-        <h1>Is the pattern visible in the patch of interest?</h1>
         <div class="pattern"><span>Pattern</span><strong id="pattern"></strong></div>
-        <p class="answer-instruction">Choose one answer, then save.</p>
+        <p class="answer-instruction">Choose one answer.</p>
         <div class="answers" id="answers">
           <button class="answer present" data-value="present"><span class="answer-title">Present</span><span class="answer-help">Clearly visible.</span></button>
           <button class="answer absent" data-value="absent"><span class="answer-title">Absent</span><span class="answer-help">Clearly not visible.</span></button>
           <button class="answer uncertain" data-value="uncertain"><span class="answer-title">Uncertain</span><span class="answer-help">Cannot decide.</span></button>
         </div>
-        <p class="choice-reminder" id="choiceReminder">Select one answer to continue.</p>
-        <div class="navigation"><button class="btn" id="previous">Back</button><button class="btn btn-primary" id="next" disabled>Save and next</button></div>
+        <p class="choice-reminder" id="choiceReminder">Answers save automatically.</p>
+        <div class="navigation"><button class="btn" id="previous">Back</button><button class="btn btn-primary" id="next">Next</button></div>
         <div class="save-state" id="saveState" role="status"></div>
         <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
       </aside>
