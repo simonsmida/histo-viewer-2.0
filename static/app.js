@@ -997,37 +997,6 @@ new OpenSeadragon.MouseTracker({
   },
 });
 
-document.addEventListener("keydown", (event) => {
-  if (event.target.tagName === "INPUT" || event.target.tagName === "SELECT" || event.target.isContentEditable) {
-    return;
-  }
-  if (event.key === "+" || event.key === "=") {
-    viewer.viewport.zoomBy(1.5);
-  }
-  if (event.key === "-") {
-    viewer.viewport.zoomBy(0.667);
-  }
-  if (event.key === "0") {
-    viewer.viewport.goHome();
-  }
-  if (event.key === "v" || event.key === "V") {
-    setActiveTool("pan");
-  }
-  if (event.key === "b" || event.key === "B") {
-    setActiveTool("bbox");
-  }
-  if (event.key === "f" || event.key === "F") {
-    setActiveTool("freehand");
-  }
-  if (event.key === "p" || event.key === "P") {
-    elements.rightPanel.classList.toggle("collapsed");
-    elements.toolPanel.classList.toggle("active");
-  }
-  if (event.key === "Escape") {
-    setActiveTool("pan");
-  }
-});
-
 async function init() {
   resizeCanvas();
   setActiveTool("pan");
