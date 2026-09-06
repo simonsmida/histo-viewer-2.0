@@ -16,11 +16,12 @@
 .patch-pane .patch-number { grid-column: 1 / -1; margin: 0; }
 .context-details { margin: 0; min-height: 380px; padding-right: 20px; border-right: 1px solid var(--line); text-align: left; grid-column: 1; grid-row: 2; position: relative; z-index: 2; }
 .context-details { height: 380px; overflow: hidden; }
-.context-details summary { color: var(--blue); cursor: pointer; font-size: 12px; font-weight: 650; user-select: none; margin-bottom: 10px; }
-.context-options { display: inline-flex; gap: 12px; margin-left: 16px; color: var(--muted); font-size: 11px; vertical-align: middle; }
+.context-details { display: grid; grid-template-columns: max-content 1fr; column-gap: 12px; align-content: start; }
+.context-details summary { grid-column: 1; color: var(--blue); cursor: pointer; font-size: 12px; font-weight: 650; user-select: none; margin: 0; }
+.context-options { grid-column: 2; display: inline-flex; gap: 12px; margin: 0; color: var(--muted); font-size: 11px; vertical-align: middle; align-items: center; }
 .context-options input { accent-color: var(--blue); }
 .context-details[open] summary { margin-bottom: 10px; }
-.context-figure { margin: 0; }
+.context-figure { grid-column: 1 / -1; margin: 0; }
 .context-figure img { display: block; width: min(100%, 360px); max-height: 330px; aspect-ratio: 1; object-fit: contain; margin: 0 auto; }
 .context-figure figcaption { color: var(--muted); font-size: 12px; margin-top: 7px; text-align: left; }
 .pattern { padding: 0; overflow: hidden; }
@@ -84,7 +85,7 @@
   .overview-actions { width: 100%; flex-direction: column; }
   .overview-actions .btn { width: 100%; }
   .patch-pane { display: block; }
-  .context-details { min-height: 0; margin-top: 18px; padding: 12px 0 0; border-right: 0; border-top: 1px solid var(--line); }
+  .context-details { display: block; min-height: 0; margin-top: 18px; padding: 12px 0 0; border-right: 0; border-top: 1px solid var(--line); }
   .context-details { height: auto; overflow: visible; }
   .patch-focus { margin-top: 14px; }
   .patch-frame { width: min(100%, 230px); }
