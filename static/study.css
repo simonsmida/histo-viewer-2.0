@@ -6,7 +6,7 @@
 .review-layout { grid-template-columns: minmax(600px, 1fr) 370px; align-items: start; }
 .patch-pane { padding: 20px; display: grid; grid-template-columns: minmax(360px, 1fr) minmax(200px, 260px); gap: 24px; align-items: center; position: relative; }
 .patch-focus { margin: 0; grid-column: 2; grid-row: 1; position: relative; z-index: 4; }
-.patch-focus img { display: block; width: min(100%, 230px); aspect-ratio: 1; object-fit: contain; margin: 0 auto; background: #f7f7f7; border-radius: 6px; image-rendering: auto; }
+.patch-focus img { display: block; width: min(100%, 230px); aspect-ratio: 1; object-fit: contain; margin: 0 auto; background: #f7f7f7; border: 3px solid #2563eb; border-radius: 4px; image-rendering: auto; }
 .patch-focus figcaption { color: var(--ink); font-size: 13px; font-weight: 700; margin-top: 9px; text-align: center; }
 .patch-pane .patch-number { grid-column: 1 / -1; margin: 0; }
 .context-details { margin: 0; padding-right: 20px; border-right: 1px solid var(--line); text-align: left; grid-column: 1; grid-row: 1; position: relative; z-index: 2; }
