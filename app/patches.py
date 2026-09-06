@@ -49,5 +49,5 @@ def crop_patch(case: Case, patch: Patch, *, context: int = 1,
         box = (round(patch.source_x * sx) - left, round(patch.source_y * sy) - top,
                round((patch.source_x + case.patch_size) * sx) - left - 1,
                round((patch.source_y + case.patch_size) * sy) - top - 1)
-        ImageDraw.Draw(image).rectangle(box, outline="#2563eb", width=2)
+        ImageDraw.Draw(image).rectangle(box, outline="#2563eb", width=max(2, context // 2))
     return image, original

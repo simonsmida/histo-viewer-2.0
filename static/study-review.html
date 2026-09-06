@@ -1,1 +1,47 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Blinded patch review · HistoViewer</title><link rel="stylesheet" href="/static/study.css"></head><body><main class="study-shell"><header class="study-header"><div class="brand">HistoViewer expert study</div><div class="step" id="progressText">Loading…</div></header><div class="review-layout"><section class="card patch-pane"><div class="validation-images"><figure><img id="contextImage" alt="Local tissue neighborhood with the evaluated patch outlined"><figcaption>Local tissue neighborhood</figcaption></figure><figure><img id="patchImage" alt="Evaluated tissue patch"><figcaption>Evaluated patch</figcaption></figure></div><p class="patch-number" id="patchNumber"></p></section><aside class="card answer-pane"><div class="eyebrow">Blinded validation</div><h1>Is the proposed pattern present?</h1><div class="pattern" id="pattern"></div><div class="answers" id="answers"><button class="answer" data-value="present">Present <span class="key">1</span></button><button class="answer" data-value="absent">Absent <span class="key">2</span></button><button class="answer" data-value="uncertain">Uncertain <span class="key">3</span></button><button class="answer" data-value="cannot_assess">Cannot assess <span class="key">4</span></button></div><div class="navigation"><button class="btn" id="previous">Previous</button><button class="btn btn-primary" id="next">Next</button></div><div class="save-state" id="saveState" role="status"></div><div class="progress-track"><div class="progress-fill" id="progressFill"></div></div></aside></div></main><script type="module" src="/static/study-review.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Blinded patch review · HistoViewer</title>
+  <link rel="stylesheet" href="/static/study.css">
+</head>
+<body>
+  <main class="study-shell">
+    <header class="study-header">
+      <div><div class="brand">HistoViewer expert study</div><div class="step-title">Patch review</div></div>
+      <div class="step" id="progressText">Loading…</div>
+    </header>
+    <div class="review-layout">
+      <section class="card patch-pane">
+        <figure class="context-figure">
+          <img id="contextImage" alt="Broader tissue area with the assessed patch outlined in blue">
+          <figcaption>Broader tissue context · assessed area outlined in blue</figcaption>
+        </figure>
+        <div class="patch-inset">
+          <img id="patchImage" alt="Magnified view of the assessed patch">
+          <div><strong>Assessed patch</strong><span>Magnified view of the outlined area</span></div>
+        </div>
+        <p class="patch-number" id="patchNumber"></p>
+      </section>
+      <aside class="card answer-pane">
+        <div class="eyebrow">Your assessment</div>
+        <h1>Does this area contain the described pattern?</h1>
+        <div class="pattern"><span>Pattern to look for</span><strong id="pattern"></strong></div>
+        <p class="answer-instruction">Choose the best answer. Your choice is saved when you continue.</p>
+        <div class="answers" id="answers">
+          <button class="answer present" data-value="present"><span class="answer-title">Yes, present</span><span class="answer-help">The pattern is clearly visible.</span></button>
+          <button class="answer absent" data-value="absent"><span class="answer-title">No, absent</span><span class="answer-help">The pattern is clearly not visible.</span></button>
+          <button class="answer uncertain" data-value="uncertain"><span class="answer-title">Uncertain</span><span class="answer-help">It may be present, but I cannot decide confidently.</span></button>
+          <button class="answer cannot" data-value="cannot_assess"><span class="answer-title">Cannot assess</span><span class="answer-help">Image quality or available tissue prevents assessment.</span></button>
+        </div>
+        <p class="choice-reminder" id="choiceReminder">Select one answer to continue.</p>
+        <div class="navigation"><button class="btn" id="previous">Back</button><button class="btn btn-primary" id="next" disabled>Save and next</button></div>
+        <div class="save-state" id="saveState" role="status"></div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </aside>
+    </div>
+  </main>
+  <script type="module" src="/static/study-review.js"></script>
+</body>
+</html>

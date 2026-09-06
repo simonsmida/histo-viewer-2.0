@@ -259,7 +259,9 @@ def api_study_patch(study_id: str, position: int) -> Response:
 
 @router.get("/api/studies/{study_id}/patches/{position}/context.png")
 def api_study_patch_context(study_id: str, position: int) -> Response:
-    return _study_patch_response(study_id, position, context=3)
+    # Nine patch widths retain local architecture while the marked patch remains
+    # visible without requiring interactive zoom controls.
+    return _study_patch_response(study_id, position, context=9)
 
 
 def _study_patch_response(study_id: str, position: int, *, context: int) -> Response:
