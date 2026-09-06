@@ -156,10 +156,6 @@ $("toggleReviewGrid").addEventListener("click", () => {
   button.textContent = hidden ? "Hide patches" : "Show patches";
   button.setAttribute("aria-expanded", String(hidden));
 });
-addEventListener("keydown", event => {
-  if (["1", "2", "3"].includes(event.key)) choose(["present", "absent", "uncertain"][Number(event.key) - 1]);
-});
-
 try {
   study = await request(`/api/studies/${id}`);
   const unfinished = study.evaluation.findIndex(item => !item.judgment);
