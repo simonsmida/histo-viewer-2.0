@@ -56,7 +56,10 @@
 .review-grid[hidden] { display: none; }
 .review-tile { min-width: 0; border: 1px solid var(--line); border-radius: 7px; background: #fff; padding: 5px; text-align: left; cursor: pointer; font: inherit; color: var(--ink); }
 .review-tile:hover, .review-tile:focus-visible { border-color: var(--blue); outline: none; box-shadow: 0 0 0 2px rgba(37,99,235,.12); }
-.review-tile.current { border: 2px solid var(--blue); padding: 4px; }
+.review-tile.present { border-color: #2f9e44; background: #f1faf2; }
+.review-tile.absent { border-color: #d94841; background: #fff4f3; }
+.review-tile.uncertain { border-color: #d99000; background: #fffaf0; }
+.review-tile.current { outline: 2px solid var(--blue); outline-offset: 1px; }
 .review-tile img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; background: var(--soft); }
 .review-tile-meta { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: 5px; font-size: 10px; }
 .review-tile-number { color: var(--muted); }

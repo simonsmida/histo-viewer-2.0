@@ -46,8 +46,9 @@ function renderReviewGrid() {
   study.evaluation.forEach((item, itemIndex) => {
     const tile = document.createElement("button");
     tile.type = "button";
-    tile.className = `review-tile${itemIndex === index ? " current" : ""}`;
     const selectedJudgment = itemIndex === index && pendingChoice ? pendingChoice : item.judgment;
+    const judgmentClass = selectedJudgment || "unanswered";
+    tile.className = `review-tile ${judgmentClass}${itemIndex === index ? " current" : ""}`;
     tile.setAttribute("aria-label", `Patch ${itemIndex + 1}: ${selectedJudgment || "not assessed"}`);
     if (itemIndex === index) tile.setAttribute("aria-current", "true");
     const image = document.createElement("img");
@@ -58,7 +59,7 @@ function renderReviewGrid() {
     const number = document.createElement("span");
     number.className = "review-tile-number";
     number.textContent = String(itemIndex + 1);
-    const judgment = selectedJudgment || "unanswered";
+    const judgment = judgmentClass;
     const status = document.createElement("span");
     status.className = `review-tile-status ${judgment}`;
     status.textContent = selectedJudgment ? selectedJudgment[0].toUpperCase() + selectedJudgment.slice(1) : "Not assessed";
