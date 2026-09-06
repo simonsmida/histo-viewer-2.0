@@ -47,7 +47,8 @@ function renderReviewGrid() {
     const tile = document.createElement("button");
     tile.type = "button";
     tile.className = `review-tile${itemIndex === index ? " current" : ""}`;
-    tile.setAttribute("aria-label", `Patch ${itemIndex + 1}: ${item.judgment || "not assessed"}`);
+    const selectedJudgment = itemIndex === index && pendingChoice ? pendingChoice : item.judgment;
+    tile.setAttribute("aria-label", `Patch ${itemIndex + 1}: ${selectedJudgment || "not assessed"}`);
     if (itemIndex === index) tile.setAttribute("aria-current", "true");
     const image = document.createElement("img");
     image.src = item.image_url;
@@ -57,10 +58,10 @@ function renderReviewGrid() {
     const number = document.createElement("span");
     number.className = "review-tile-number";
     number.textContent = String(itemIndex + 1);
-    const judgment = item.judgment || "unanswered";
+    const judgment = selectedJudgment || "unanswered";
     const status = document.createElement("span");
     status.className = `review-tile-status ${judgment}`;
-    status.textContent = item.judgment ? item.judgment[0].toUpperCase() + item.judgment.slice(1) : "Not assessed";
+    status.textContent = selectedJudgment ? selectedJudgment[0].toUpperCase() + selectedJudgment.slice(1) : "Not assessed";
     meta.append(number, status);
     tile.append(image, meta);
     tile.addEventListener("click", () => {
