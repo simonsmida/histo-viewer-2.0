@@ -66,7 +66,7 @@ try {
   $("title").textContent = `Pattern: ${data.pattern}`;
   $("subtitle").textContent = `${data.case_label} · ${data.reviewer}`;
   $("precision").textContent = pct(data.precision_at_20);
-  $("precisionNote").textContent = `Based on ${data.precision_n} assessable highest-activation patches.`;
+  $("precisionNote").textContent = `Based on ${data.precision_n} patches marked Present or Absent.`;
   $("auprc").textContent = num(data.auprc);
   $("baseline").textContent = `Chance reference (prevalence): ${pct(data.prevalence)}`;
   $("completed").textContent = `${data.completed}/${data.total}`;
