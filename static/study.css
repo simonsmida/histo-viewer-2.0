@@ -17,8 +17,8 @@
 .context-details { margin: 0; min-height: 380px; padding-right: 20px; border-right: 1px solid var(--line); text-align: left; grid-column: 1; grid-row: 2; position: relative; z-index: 2; }
 .context-details { height: 380px; overflow: hidden; }
 .context-details { display: grid; grid-template-columns: max-content 1fr; column-gap: 12px; align-content: start; }
-.context-details summary { grid-column: 1; color: var(--blue); cursor: pointer; font-size: 12px; font-weight: 650; user-select: none; margin: 0; }
-.context-options { grid-column: 2; display: inline-flex; gap: 12px; margin: 0; color: var(--muted); font-size: 11px; vertical-align: middle; align-items: center; }
+.context-details summary { grid-column: 1; align-self: start; color: var(--blue); cursor: pointer; font-size: 12px; font-weight: 650; user-select: none; margin: 0; }
+.context-options { grid-column: 2; align-self: start; display: inline-flex; gap: 12px; margin: 0; color: var(--muted); font-size: 11px; vertical-align: middle; align-items: center; }
 .context-options input { accent-color: var(--blue); }
 .context-details[open] summary { margin-bottom: 10px; }
 .context-figure { grid-column: 1 / -1; margin: 0; }
