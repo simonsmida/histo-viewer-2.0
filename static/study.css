@@ -5,11 +5,11 @@
 .step-title { color: var(--muted); font-size: 12px; margin-top: 2px; }
 .review-layout { grid-template-columns: minmax(600px, 1fr) 370px; align-items: start; }
 .patch-pane { padding: 20px; display: grid; grid-template-columns: minmax(220px, 300px) minmax(300px, 1fr); gap: 24px; align-items: start; }
-.patch-focus { margin: 0; }
-.patch-focus img { display: block; width: min(100%, 300px); aspect-ratio: 1; object-fit: contain; margin: 0 auto; background: #f7f7f7; border-radius: 6px; image-rendering: auto; }
+.patch-focus { margin: 0; grid-column: 2; grid-row: 1; }
+.patch-focus img { display: block; width: min(100%, 230px); aspect-ratio: 1; object-fit: contain; margin: 0 auto; background: #f7f7f7; border-radius: 6px; image-rendering: auto; }
 .patch-focus figcaption { color: var(--ink); font-size: 13px; font-weight: 700; margin-top: 9px; text-align: center; }
 .patch-pane .patch-number { grid-column: 1 / -1; margin: 0; }
-.context-details { margin: 0; padding-left: 20px; border-left: 1px solid var(--line); text-align: left; }
+.context-details { margin: 0; padding-right: 20px; border-right: 1px solid var(--line); text-align: left; grid-column: 1; grid-row: 1; }
 .context-details summary { color: var(--blue); cursor: pointer; font-size: 12px; font-weight: 650; user-select: none; margin-bottom: 10px; }
 .context-details[open] summary { margin-bottom: 10px; }
 .context-figure { margin: 0; }
@@ -34,10 +34,11 @@
   .review-layout { grid-template-columns: 1fr; }
   .answer-pane { order: 0; }
   .context-figure img { max-height: none; }
-  .patch-pane { grid-template-columns: minmax(180px, 280px) minmax(260px, 1fr); }
+  .patch-pane { grid-template-columns: minmax(180px, 280px) minmax(220px, 1fr); }
 }
 @media(max-width: 560px) {
   .patch-pane { display: block; }
-  .context-details { margin-top: 18px; padding: 12px 0 0; border-left: 0; border-top: 1px solid var(--line); }
-  .patch-focus img { width: 100%; }
+  .context-details { margin-top: 18px; padding: 12px 0 0; border-right: 0; border-top: 1px solid var(--line); }
+  .patch-focus { margin-top: 14px; }
+  .patch-focus img { width: min(100%, 230px); }
 }
