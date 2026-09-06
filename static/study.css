@@ -46,8 +46,9 @@
 .context-links { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 3; }
 .context-links line { stroke: #2563eb; stroke-width: 1.5; stroke-dasharray: 5 4; opacity: .8; }
 .patch-frame.without-outline { outline-color: transparent; }
-.navigation .btn { min-height: 42px; font-weight: 650; }
-.navigation .btn-primary { flex: 1; }
+.navigation .btn { flex: 1; min-width: 0; min-height: 42px; font-weight: 650; }
+.btn-secondary { background: #f1f5ff; border-color: #b9c9f2; color: #2450a8; }
+.btn-success { background: var(--green); border-color: var(--green); color: #fff; }
 .review-overview { margin-top: 12px; padding: 20px; }
 .review-overview-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .review-overview h2 { margin: 0; font-size: 17px; }
