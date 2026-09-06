@@ -19,6 +19,7 @@ function render() {
   $("pattern").textContent = study.pattern;
   $("patchImage").src = item.image_url;
   $("contextImage").src = item.context_url;
+  $("contextImage").dataset.contextBox = JSON.stringify(item.context_box);
   $("patchNumber").textContent = `Patch ${index + 1} of ${study.total}`;
   $("progressText").textContent = `${study.completed} of ${study.total} completed`;
   $("progressFill").style.width = `${100 * study.completed / study.total}%`;
@@ -30,6 +31,29 @@ function render() {
   $("previous").disabled = index === 0 || saving;
   $("next").disabled = !pendingChoice || saving;
   $("next").textContent = index === study.total - 1 ? "Save and view results" : "Save and next";
+  requestAnimationFrame(updateContextLinks);
+}
+
+function updateContextLinks() {
+  const pane = document.querySelector(".patch-pane");
+  const context = $("contextImage");
+  const patch = $("patchImage");
+  const svg = $("contextLinks");
+  if (!pane || !context || !patch || !svg || !context.getBoundingClientRect().width) return;
+  const paneRect = pane.getBoundingClientRect();
+  const c = context.getBoundingClientRect();
+  const p = patch.getBoundingClientRect();
+  let box;
+  try { box = JSON.parse(context.dataset.contextBox); } catch { box = {left: .4, top: .4, width: .2, height: .2}; }
+  const x = c.left - paneRect.left + box.left * c.width;
+  const y = c.top - paneRect.top + box.top * c.height;
+  const w = box.width * c.width;
+  const h = box.height * c.height;
+  const from = [[x, y], [x + w, y], [x, y + h], [x + w, y + h]];
+  const to = [[p.left - paneRect.left, p.top - paneRect.top], [p.right - paneRect.left, p.top - paneRect.top], [p.left - paneRect.left, p.bottom - paneRect.top], [p.right - paneRect.left, p.bottom - paneRect.top]];
+  svg.setAttribute("viewBox", `0 0 ${pane.clientWidth} ${pane.clientHeight}`);
+  svg.setAttribute("width", pane.clientWidth); svg.setAttribute("height", pane.clientHeight);
+  svg.innerHTML = from.map((point, i) => `<line x1="${point[0]}" y1="${point[1]}" x2="${to[i][0]}" y2="${to[i][1]}" />`).join("");
 }
 
 function choose(value) {
@@ -76,3 +100,7 @@ try {
 } catch (error) {
   document.querySelector("main").innerHTML = '<div class="card error">This study could not be loaded.</div>';
 }
+
+addEventListener("resize", updateContextLinks);
+$("contextImage")?.addEventListener("load", updateContextLinks);
+$("patchImage")?.addEventListener("load", updateContextLinks);

@@ -136,6 +136,16 @@ def create_study(data: StudyCreate) -> dict:
     if not zeros:
         raise HTTPException(422, "No defensible zero-activation controls are available")
     rng.shuffle(selected)
+    def context_box(p):
+        left = max(0, p.source_x - 2 * case.patch_size)
+        top = max(0, p.source_y - 2 * case.patch_size)
+        right = min(case.source_width, p.source_x + 3 * case.patch_size)
+        bottom = min(case.source_height, p.source_y + 3 * case.patch_size)
+        return {"left": (p.source_x - left) / max(1, right - left),
+                "top": (p.source_y - top) / max(1, bottom - top),
+                "width": case.patch_size / max(1, right - left),
+                "height": case.patch_size / max(1, bottom - top)}
+
     evaluation = [{
         "position": i + 1,
         "patch_index": p.patch_index,
@@ -143,6 +153,7 @@ def create_study(data: StudyCreate) -> dict:
         "source_y": p.source_y,
         "score": score,
         "stratum": stratum,
+        "context_box": context_box(p),
         "judgment": None,
     } for i, (p, stratum, score) in enumerate(selected)]
     now = datetime.now(timezone.utc).isoformat()
@@ -174,6 +185,7 @@ def public_study(record: dict) -> dict:
             "position": x["position"], "judgment": x["judgment"],
             "image_url": f"/api/studies/{record['id']}/patches/{x['position']}.png",
             "context_url": f"/api/studies/{record['id']}/patches/{x['position']}/context.png",
+            "context_box": x.get("context_box", {"left": .4, "top": .4, "width": .2, "height": .2}),
         } for x in items],
     }
 

@@ -11,7 +11,8 @@ class StudyTests(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
         self.root = Path(tmp.name)
-        self.case = SimpleNamespace(id="case-01", label="Sample", concepts=[], patch_size=96)
+        self.case = SimpleNamespace(id="case-01", label="Sample", concepts=[], patch_size=96,
+                                    source_width=5000, source_height=5000)
         self.concept = SimpleNamespace(id="concept-0001", patches_revision="rev")
         self.positives = [SimpleNamespace(rank=i + 1, patch_index=i, source_x=i * 2,
                           source_y=i * 3, score=100 - i) for i in range(100)]
@@ -33,7 +34,7 @@ class StudyTests(unittest.TestCase):
         public = studies.create_study(studies.StudyCreate(
             case_id="case-01", concept_id="concept-0001", reviewer="P1",
             assessment="clear", pattern="adipose tissue", confidence="high"))
-        self.assertEqual(set(public["evaluation"][0]), {"position", "judgment", "image_url", "context_url"})
+        self.assertEqual(set(public["evaluation"][0]), {"position", "judgment", "image_url", "context_url", "context_box"})
         record = studies._load(public["id"])
         self.assertFalse(set(range(studies.DISCOVERY_COUNT)) & {x["patch_index"] for x in record["evaluation"]})
         self.assertEqual({x["stratum"] for x in record["evaluation"]}, set(studies.STRATA))
