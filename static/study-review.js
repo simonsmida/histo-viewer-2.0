@@ -4,6 +4,7 @@ let study;
 let index = 0;
 let saving = false;
 let pendingChoice = null;
+const ADVANCE_DELAY_MS = 650;
 
 async function request(url, options) {
   const response = await fetch(url, options);
@@ -83,7 +84,12 @@ async function choose(value) {
       method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify({judgment: value}),
     });
     $("saveState").textContent = "Saved";
-    if (index < study.total - 1) { index += 1; pendingChoice = null; }
+    // Leave the chosen answer visible briefly so the expert can register the
+    // color-coded confirmation before the next patch is shown.
+    if (index < study.total - 1) {
+      await new Promise(resolve => setTimeout(resolve, ADVANCE_DELAY_MS));
+      index += 1; pendingChoice = null;
+    }
   } catch (error) {
     $("saveState").textContent = "Could not save. Please try again.";
   } finally {
