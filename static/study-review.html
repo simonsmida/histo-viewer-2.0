@@ -50,7 +50,10 @@
           <h2 id="reviewOverviewTitle">Reviewed patches</h2>
           <p>All sampled patches and your assessments.</p>
         </div>
-        <button class="btn btn-primary" id="viewResults" disabled>View results</button>
+        <div class="overview-actions">
+          <button class="btn" id="toggleReviewGrid" type="button" aria-expanded="true">Hide patches</button>
+          <button class="btn btn-primary" id="viewResults" disabled>View results</button>
+        </div>
       </div>
       <div class="review-grid" id="reviewGrid"></div>
     </section>

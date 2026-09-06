@@ -145,6 +145,14 @@ $("viewResults").addEventListener("click", () => {
   if (!study || saving || study.completed < study.total) return;
   location.href = `/study/results?id=${encodeURIComponent(id)}`;
 });
+$("toggleReviewGrid").addEventListener("click", () => {
+  const grid = $("reviewGrid");
+  const button = $("toggleReviewGrid");
+  const hidden = !grid.hidden;
+  grid.hidden = hidden;
+  button.textContent = hidden ? "Show patches" : "Hide patches";
+  button.setAttribute("aria-expanded", String(!hidden));
+});
 addEventListener("keydown", event => {
   if (["1", "2", "3"].includes(event.key)) choose(["present", "absent", "uncertain"][Number(event.key) - 1]);
 });
