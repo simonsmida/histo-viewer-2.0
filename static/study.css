@@ -53,6 +53,7 @@
 .overview-actions .btn { min-width: 130px; }
 .overview-actions #toggleReviewGrid { min-width: 112px; }
 .review-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 10px; }
+.review-grid[hidden] { display: none; }
 .review-tile { min-width: 0; border: 1px solid var(--line); border-radius: 7px; background: #fff; padding: 5px; text-align: left; cursor: pointer; font: inherit; color: var(--ink); }
 .review-tile:hover, .review-tile:focus-visible { border-color: var(--blue); outline: none; box-shadow: 0 0 0 2px rgba(37,99,235,.12); }
 .review-tile.current { border: 2px solid var(--blue); padding: 4px; }
