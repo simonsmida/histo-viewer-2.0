@@ -22,8 +22,8 @@
 .context-figure figcaption { color: var(--muted); font-size: 12px; margin-top: 7px; text-align: left; }
 .pattern { padding: 0; overflow: hidden; }
 .pattern span, .pattern strong { display: block; }
-.pattern span { padding: 8px 12px; color: var(--muted); font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--line); }
-.pattern strong { padding: 12px; font-size: 15px; }
+.pattern span { padding: 8px 12px; color: var(--ink); font-size: 11px; font-weight: 750; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--line); }
+.pattern strong { padding: 12px; font-size: 15px; font-weight: 400; }
 .answer-instruction { color: var(--muted); font-size: 12px; margin: 0 0 10px; }
 .answer { display: block; position: relative; padding: 11px 38px 11px 13px; min-height: 59px; }
 .answer.present { border-left: 4px solid #2f9e44; }
