@@ -4,15 +4,16 @@
 .study-shell { max-width: 1240px; }
 .step-title { color: var(--muted); font-size: 12px; margin-top: 2px; }
 .review-layout { grid-template-columns: minmax(600px, 1fr) 370px; align-items: start; }
-.patch-pane { padding: 20px; }
+.patch-pane { padding: 20px; display: grid; grid-template-columns: minmax(220px, 300px) minmax(300px, 1fr); gap: 24px; align-items: start; }
 .patch-focus { margin: 0; }
-.patch-focus img { display: block; width: min(100%, 560px); aspect-ratio: 1; object-fit: contain; margin: 0 auto; background: #f7f7f7; border-radius: 6px; }
+.patch-focus img { display: block; width: min(100%, 300px); aspect-ratio: 1; object-fit: contain; margin: 0 auto; background: #f7f7f7; border-radius: 6px; image-rendering: auto; }
 .patch-focus figcaption { color: var(--ink); font-size: 13px; font-weight: 700; margin-top: 9px; text-align: center; }
-.context-details { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 12px; text-align: left; }
-.context-details summary { color: var(--blue); cursor: pointer; font-size: 12px; font-weight: 650; user-select: none; }
+.patch-pane .patch-number { grid-column: 1 / -1; margin: 0; }
+.context-details { margin: 0; padding-left: 20px; border-left: 1px solid var(--line); text-align: left; }
+.context-details summary { color: var(--blue); cursor: pointer; font-size: 12px; font-weight: 650; user-select: none; margin-bottom: 10px; }
 .context-details[open] summary { margin-bottom: 10px; }
 .context-figure { margin: 0; }
-.context-figure img { display: block; width: min(100%, 360px); max-height: 360px; aspect-ratio: 1; object-fit: contain; margin: 0 auto; }
+.context-figure img { display: block; width: min(100%, 420px); max-height: 420px; aspect-ratio: 1; object-fit: contain; margin: 0 auto; }
 .context-figure figcaption { color: var(--muted); font-size: 12px; margin-top: 7px; text-align: left; }
 .pattern { padding: 0; overflow: hidden; }
 .pattern span, .pattern strong { display: block; }
@@ -33,7 +34,10 @@
   .review-layout { grid-template-columns: 1fr; }
   .answer-pane { order: 0; }
   .context-figure img { max-height: none; }
+  .patch-pane { grid-template-columns: minmax(180px, 280px) minmax(260px, 1fr); }
 }
 @media(max-width: 560px) {
+  .patch-pane { display: block; }
+  .context-details { margin-top: 18px; padding: 12px 0 0; border-left: 0; border-top: 1px solid var(--line); }
   .patch-focus img { width: 100%; }
 }
