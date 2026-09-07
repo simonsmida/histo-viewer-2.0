@@ -68,9 +68,10 @@
 .stratum-key.medium, .review-tile-stratum.medium { background: #60a5fa; color: #082f6b; }
 .stratum-key.high, .review-tile-stratum.high { background: #2563eb; color: #fff; }
 .stratum-key.top, .review-tile-stratum.top { background: #1e3a8a; color: #fff; }
-.grid-order, .grid-display { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; white-space: nowrap; }
-.grid-order select, .grid-display select { border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); padding: 7px 9px; font: inherit; }
-.grid-order select:disabled, .grid-display select:disabled { color: var(--muted); background: var(--soft); }
+.grid-order, .stratum-toggle { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.stratum-toggle input { accent-color: var(--blue); margin: 0; }
+.grid-order select { border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); padding: 7px 9px; font: inherit; }
+.grid-order select:disabled { color: var(--muted); background: var(--soft); }
 .metric-note + .metric-note { margin-top: 4px; }
 .answer-actions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
 .answer-actions .btn { flex: 1; min-width: 0; }
@@ -83,15 +84,10 @@
 .review-tile.present { border-color: #2f9e44; background: #f1faf2; }
 .review-tile.absent { border-color: #d94841; background: #fff4f3; }
 .review-tile.uncertain { border-color: #d99000; background: #fffaf0; }
-.review-tile.stratum-zero { border-color: rgba(226,232,240,.8); background: rgba(226,232,240,.42); }
-.review-tile.stratum-low { border-color: rgba(191,219,254,.9); background: rgba(191,219,254,.42); }
-.review-tile.stratum-medium { border-color: rgba(96,165,250,.75); background: rgba(96,165,250,.26); }
-.review-tile.stratum-high { border-color: rgba(37,99,235,.65); background: rgba(37,99,235,.16); }
-.review-tile.stratum-top { border-color: rgba(30,58,138,.65); background: rgba(30,58,138,.14); }
 .review-tile.current { outline: 2px solid var(--blue); outline-offset: 1px; }
 .review-tile img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; background: var(--soft); }
 .review-tile-meta { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: 5px; font-size: 10px; }
-.review-tile-number { color: var(--muted); }
+.review-tile-meta.assessment-only { justify-content: flex-end; }
 .review-tile-status { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
 .review-tile-status.present { color: var(--green); }
 .review-tile-status.absent { color: var(--red); }

@@ -8,12 +8,8 @@ let activationOrder = null;
 let activationStrata = null;
 let activationOrderRequested = false;
 let gridOrder = "sample";
-let displayMode = "judgment";
+let showStrata = false;
 const ADVANCE_DELAY_MS = 650;
-
-function activationDisplayOption() {
-  return $("gridDisplay").querySelector('option[value="activation"]');
-}
 
 async function request(url, options) {
   const response = await fetch(url, options);
@@ -46,9 +42,8 @@ function render() {
   $("viewResults").disabled = study.completed < study.total || saving;
   $("resultsHelp").textContent = study.completed < study.total ? "Complete all patches to view results." : "Study complete. Results are ready.";
   $("gridOrder").disabled = study.completed < study.total || !activationOrder || saving;
-  activationDisplayOption().disabled = study.completed < study.total || !activationStrata || saving;
-  $("gridDisplay").value = displayMode;
-  $("stratumLegend").hidden = displayMode !== "activation" || !activationStrata || !Object.keys(activationStrata).length;
+  $("showStrata").disabled = study.completed < study.total || !activationStrata || saving;
+  $("stratumLegend").hidden = !showStrata || !activationStrata || !Object.keys(activationStrata).length;
   requestActivationOrder();
   renderReviewGrid();
   requestAnimationFrame(updateContextLinks);
@@ -60,8 +55,8 @@ function requestActivationOrder() {
   request(`/api/studies/${id}/results`).then(results => {
     activationOrder = results.activation_order || [];
     activationStrata = results.activation_strata || {};
-    activationDisplayOption().disabled = !Object.keys(activationStrata).length || saving;
-    $("stratumLegend").hidden = displayMode !== "activation" || !Object.keys(activationStrata).length;
+    $("showStrata").disabled = !Object.keys(activationStrata).length || saving;
+    $("stratumLegend").hidden = !showStrata || !Object.keys(activationStrata).length;
     $("gridOrder").disabled = !activationOrder.length || saving;
     renderReviewGrid();
   }).catch(() => {
@@ -86,9 +81,8 @@ function renderReviewGrid() {
     tile.type = "button";
     const selectedJudgment = itemIndex === index && pendingChoice ? pendingChoice : item.judgment;
     const judgmentClass = selectedJudgment || "unanswered";
-    const stratum = displayMode === "activation" ? activationStrata?.[item.position] : null;
-    const displayClass = stratum ? `stratum-${stratum}` : judgmentClass;
-    tile.className = `review-tile ${displayClass}${itemIndex === index ? " current" : ""}`;
+    const stratum = showStrata ? activationStrata?.[item.position] : null;
+    tile.className = `review-tile ${judgmentClass}${itemIndex === index ? " current" : ""}`;
     const displayLabel = stratum ? `${stratum} activation sample` : (selectedJudgment || "not assessed");
     tile.setAttribute("aria-label", `Patch ${item.position}: ${displayLabel}`);
     if (itemIndex === index) tile.setAttribute("aria-current", "true");
@@ -106,19 +100,13 @@ function renderReviewGrid() {
     }
     const meta = document.createElement("span");
     meta.className = "review-tile-meta";
-    const number = document.createElement("span");
-    number.className = "review-tile-number";
-    number.textContent = String(item.position);
+    if (!region) meta.classList.add("assessment-only");
     const judgment = judgmentClass;
-    meta.append(number);
-    if (displayMode === "judgment") {
-      const status = document.createElement("span");
-      status.className = `review-tile-status ${judgment}`;
-      status.textContent = selectedJudgment ? selectedJudgment[0].toUpperCase() + selectedJudgment.slice(1) : "Not assessed";
-      meta.append(status);
-    } else if (region) {
-      meta.append(region);
-    }
+    if (region) meta.append(region);
+    const status = document.createElement("span");
+    status.className = `review-tile-status ${judgment}`;
+    status.textContent = selectedJudgment ? selectedJudgment[0].toUpperCase() + selectedJudgment.slice(1) : "Not assessed";
+    meta.append(status);
     tile.append(meta);
     tile.addEventListener("click", () => {
       if (saving) return;
@@ -214,9 +202,9 @@ $("gridOrder").addEventListener("change", event => {
   gridOrder = event.target.value;
   renderReviewGrid();
 });
-$("gridDisplay").addEventListener("change", event => {
-  displayMode = event.target.value;
-  $("stratumLegend").hidden = displayMode !== "activation" || !activationStrata || !Object.keys(activationStrata).length;
+$("showStrata").addEventListener("change", event => {
+  showStrata = event.target.checked;
+  $("stratumLegend").hidden = !showStrata || !activationStrata || !Object.keys(activationStrata).length;
   renderReviewGrid();
 });
 try {
