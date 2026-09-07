@@ -43,7 +43,6 @@ function render() {
   $("resultsHelp").textContent = study.completed < study.total ? "Complete all patches to view results." : "Study complete. Results are ready.";
   $("gridOrder").disabled = study.completed < study.total || !activationOrder || saving;
   $("showStrata").disabled = study.completed < study.total || !activationStrata || saving;
-  $("stratumLegend").hidden = !showStrata || !activationStrata || !Object.keys(activationStrata).length;
   requestActivationOrder();
   renderReviewGrid();
   requestAnimationFrame(updateContextLinks);
@@ -56,7 +55,6 @@ function requestActivationOrder() {
     activationOrder = results.activation_order || [];
     activationStrata = results.activation_strata || {};
     $("showStrata").disabled = !Object.keys(activationStrata).length || saving;
-    $("stratumLegend").hidden = !showStrata || !Object.keys(activationStrata).length;
     $("gridOrder").disabled = !activationOrder.length || saving;
     renderReviewGrid();
   }).catch(() => {
@@ -204,7 +202,6 @@ $("gridOrder").addEventListener("change", event => {
 });
 $("showStrata").addEventListener("change", event => {
   showStrata = event.target.checked;
-  $("stratumLegend").hidden = !showStrata || !activationStrata || !Object.keys(activationStrata).length;
   renderReviewGrid();
 });
 try {

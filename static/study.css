@@ -56,18 +56,13 @@
 .review-overview h2 { margin: 0; font-size: 17px; }
 .review-overview-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
 .review-overview-controls { display: flex; align-items: flex-start; justify-content: flex-end; gap: 14px; min-height: 47px; }
-.stratum-legend-slot { min-height: 26px; }
-.stratum-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-.stratum-legend[hidden] { display: none; }
-.stratum-legend-label { color: var(--muted); font-size: 11px; }
-.stratum-key, .review-tile-stratum { border-radius: 4px; font-size: 10px; font-weight: 700; line-height: 1.2; }
-.stratum-key { padding: 3px 6px; }
+.review-tile-stratum { border-radius: 4px; font-size: 10px; font-weight: 700; line-height: 1.2; }
 .review-tile-stratum { display: inline-flex; align-items: center; max-width: 62%; overflow: hidden; padding: 1px 4px; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
-.stratum-key.zero, .review-tile-stratum.zero { background: #e2e8f0; color: #475569; }
-.stratum-key.low, .review-tile-stratum.low { background: #bfdbfe; color: #1e3a8a; }
-.stratum-key.medium, .review-tile-stratum.medium { background: #60a5fa; color: #082f6b; }
-.stratum-key.high, .review-tile-stratum.high { background: #2563eb; color: #fff; }
-.stratum-key.top, .review-tile-stratum.top { background: #1e3a8a; color: #fff; }
+.review-tile-stratum.zero { background: #e2e8f0; color: #475569; }
+.review-tile-stratum.low { background: #bfdbfe; color: #1e3a8a; }
+.review-tile-stratum.medium { background: #60a5fa; color: #082f6b; }
+.review-tile-stratum.high { background: #2563eb; color: #fff; }
+.review-tile-stratum.top { background: #1e3a8a; color: #fff; }
 .grid-order, .stratum-toggle { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; white-space: nowrap; }
 .stratum-toggle input { accent-color: var(--blue); margin: 0; }
 .grid-order select { border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); padding: 7px 9px; font: inherit; }
