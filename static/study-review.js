@@ -11,6 +11,10 @@ let gridOrder = "sample";
 let displayMode = "judgment";
 const ADVANCE_DELAY_MS = 650;
 
+function activationDisplayOption() {
+  return $("gridDisplay").querySelector('option[value="activation"]');
+}
+
 async function request(url, options) {
   const response = await fetch(url, options);
   if (!response.ok) throw new Error(await response.text());
@@ -42,8 +46,8 @@ function render() {
   $("viewResults").disabled = study.completed < study.total || saving;
   $("resultsHelp").textContent = study.completed < study.total ? "Complete all patches to view results." : "Study complete. Results are ready.";
   $("gridOrder").disabled = study.completed < study.total || !activationOrder || saving;
-  $("displayActivation").disabled = study.completed < study.total || !activationStrata || saving;
-  $("displayActivation").checked = displayMode === "activation";
+  activationDisplayOption().disabled = study.completed < study.total || !activationStrata || saving;
+  $("gridDisplay").value = displayMode;
   $("stratumLegend").hidden = displayMode !== "activation" || !activationStrata || !Object.keys(activationStrata).length;
   requestActivationOrder();
   renderReviewGrid();
@@ -56,7 +60,7 @@ function requestActivationOrder() {
   request(`/api/studies/${id}/results`).then(results => {
     activationOrder = results.activation_order || [];
     activationStrata = results.activation_strata || {};
-    $("displayActivation").disabled = !Object.keys(activationStrata).length || saving;
+    activationDisplayOption().disabled = !Object.keys(activationStrata).length || saving;
     $("stratumLegend").hidden = displayMode !== "activation" || !Object.keys(activationStrata).length;
     $("gridOrder").disabled = !activationOrder.length || saving;
     renderReviewGrid();
@@ -210,11 +214,11 @@ $("gridOrder").addEventListener("change", event => {
   gridOrder = event.target.value;
   renderReviewGrid();
 });
-document.querySelectorAll('input[name="gridDisplay"]').forEach(input => input.addEventListener("change", event => {
+$("gridDisplay").addEventListener("change", event => {
   displayMode = event.target.value;
   $("stratumLegend").hidden = displayMode !== "activation" || !activationStrata || !Object.keys(activationStrata).length;
   renderReviewGrid();
-}));
+});
 try {
   study = await request(`/api/studies/${id}`);
   $("backToViewer").href = `/?study_id=${encodeURIComponent(id)}`;

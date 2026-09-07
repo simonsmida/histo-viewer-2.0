@@ -54,13 +54,12 @@
           <p>All sampled patches and your assessments.</p>
         </div>
         <div class="review-overview-controls">
-          <fieldset class="review-display-mode">
-            <legend>Color patches by</legend>
-            <div class="display-mode-options">
-              <label><input type="radio" name="gridDisplay" value="judgment" checked><span>Your assessments</span></label>
-              <label><input id="displayActivation" type="radio" name="gridDisplay" value="activation" disabled><span>Activation regions</span></label>
-            </div>
-          </fieldset>
+          <label class="grid-display">Color patches by
+            <select id="gridDisplay">
+              <option value="judgment">Your assessments</option>
+              <option value="activation" disabled>Activation regions</option>
+            </select>
+          </label>
           <label class="grid-order">Order
             <select id="gridOrder" title="Available after all patch assessments are saved." disabled>
               <option value="sample">Sample order</option>
