@@ -6,6 +6,7 @@ import io
 import json
 from functools import lru_cache
 from pathlib import Path
+from urllib.parse import quote
 
 from fastapi import Body, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
@@ -112,13 +113,28 @@ def index() -> HTMLResponse:
 
 
 @app.get("/study/review")
-def study_review_page() -> FileResponse:
-    return FileResponse(STATIC_DIR / "study-review.html", headers=NO_STORE_HEADERS)
+def study_review_page(request: Request) -> HTMLResponse:
+    html = (STATIC_DIR / "study-review.html").read_text(encoding="utf-8")
+    study_id = quote(request.query_params.get("id", ""), safe="")
+    if study_id:
+        html = html.replace('id="backToViewer" href="/"', f'id="backToViewer" href="/?study_id={study_id}"')
+    for asset in ("study.css", "study-review.js"):
+        revision = hashlib.sha256((STATIC_DIR / asset).read_bytes()).hexdigest()[:16]
+        html = html.replace(f'"/static/{asset}"', f'"/static/{asset}?v={revision}"')
+    return HTMLResponse(html, headers=NO_STORE_HEADERS)
 
 
 @app.get("/study/results")
-def study_results_page() -> FileResponse:
-    return FileResponse(STATIC_DIR / "study-results.html", headers=NO_STORE_HEADERS)
+def study_results_page(request: Request) -> HTMLResponse:
+    html = (STATIC_DIR / "study-results.html").read_text(encoding="utf-8")
+    study_id = quote(request.query_params.get("id", ""), safe="")
+    if study_id:
+        html = html.replace('id="backToStudy" href="/"', f'id="backToStudy" href="/study/review?id={study_id}"')
+        html = html.replace('<a class="btn" href="/">HistoViewer</a>', f'<a class="btn" href="/?study_id={study_id}">HistoViewer</a>')
+    for asset in ("study.css", "study-results.js"):
+        revision = hashlib.sha256((STATIC_DIR / asset).read_bytes()).hexdigest()[:16]
+        html = html.replace(f'"/static/{asset}"', f'"/static/{asset}?v={revision}"')
+    return HTMLResponse(html, headers=NO_STORE_HEADERS)
 
 
 @app.get("/api/health")
