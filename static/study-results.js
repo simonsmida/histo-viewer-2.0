@@ -63,6 +63,9 @@ function precisionRecall(svg, data, baseline) {
 
 try {
   const data = await getResults();
+  // Keep the rendered label aligned with the results terminology used by the study.
+  const activationHeading = $("activation").closest(".plot-card")?.querySelector("h2");
+  if (activationHeading) activationHeading.textContent = "Activation plot";
   $("backToStudy").href = `/study/review?id=${encodeURIComponent(id)}`;
   const backToViewer = document.querySelector(".results-links a:last-child");
   if (backToViewer) backToViewer.href = `/?study_id=${encodeURIComponent(id)}`;
@@ -83,7 +86,8 @@ try {
   $("activation").nextElementSibling.textContent = "Darker blue indicates higher activation. Dashed gray line shows overall validation prevalence.";
   precisionRecall($("pr"), data.pr_curve, data.prevalence);
   const colors = {present: "#087f5b", absent: "#c33b48", uncertain: "#d89016", cannot_assess: "#8993a5", unreviewed: "#dfe4ec"};
-  for (const [key, color] of Object.entries(colors)) {
+  for (const key of ["present", "uncertain", "absent", "cannot_assess", "unreviewed"]) {
+    const color = colors[key];
     const count = data.judgment_counts[key];
     if (!count) continue;
     const segment = document.createElement("span");
