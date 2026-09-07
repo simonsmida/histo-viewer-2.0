@@ -61,13 +61,16 @@
             <span class="stratum-key top">Top</span>
           </div>
         </div>
-        <label class="grid-order">Order
-          <select id="gridOrder" title="Available after all patch assessments are saved." disabled>
-            <option value="sample">Sample order</option>
-            <option value="activation-desc">Activation: high → low</option>
-            <option value="activation-asc">Activation: low → high</option>
-          </select>
-        </label>
+        <div class="review-overview-controls">
+          <label class="stratum-toggle"><input id="showStrata" type="checkbox" disabled> Show activation regions</label>
+          <label class="grid-order">Order
+            <select id="gridOrder" title="Available after all patch assessments are saved." disabled>
+              <option value="sample">Sample order</option>
+              <option value="activation-desc">Activation: high → low</option>
+              <option value="activation-asc">Activation: low → high</option>
+            </select>
+          </label>
+        </div>
       </div>
       <div class="review-grid" id="reviewGrid"></div>
     </section>

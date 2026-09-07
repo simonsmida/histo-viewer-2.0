@@ -8,6 +8,7 @@ let activationOrder = null;
 let activationStrata = null;
 let activationOrderRequested = false;
 let gridOrder = "sample";
+let showStrata = false;
 const ADVANCE_DELAY_MS = 650;
 
 async function request(url, options) {
@@ -41,6 +42,7 @@ function render() {
   $("viewResults").disabled = study.completed < study.total || saving;
   $("resultsHelp").textContent = study.completed < study.total ? "Complete all patches to view results." : "Study complete. Results are ready.";
   $("gridOrder").disabled = study.completed < study.total || !activationOrder || saving;
+  $("showStrata").disabled = study.completed < study.total || !activationStrata || saving;
   requestActivationOrder();
   renderReviewGrid();
   requestAnimationFrame(updateContextLinks);
@@ -52,7 +54,8 @@ function requestActivationOrder() {
   request(`/api/studies/${id}/results`).then(results => {
     activationOrder = results.activation_order || [];
     activationStrata = results.activation_strata || {};
-    $("stratumLegend").hidden = !Object.keys(activationStrata).length;
+    $("showStrata").disabled = !Object.keys(activationStrata).length || saving;
+    $("stratumLegend").hidden = !showStrata || !Object.keys(activationStrata).length;
     $("gridOrder").disabled = !activationOrder.length || saving;
     renderReviewGrid();
   }).catch(() => {
@@ -83,7 +86,7 @@ function renderReviewGrid() {
     const image = document.createElement("img");
     image.src = item.image_url;
     image.alt = `Patch ${item.position}`;
-    const stratum = activationStrata?.[item.position];
+    const stratum = showStrata ? activationStrata?.[item.position] : null;
     if (stratum) {
       const region = document.createElement("span");
       region.className = `review-tile-stratum ${stratum}`;
@@ -197,6 +200,11 @@ $("toggleReviewGrid").addEventListener("click", () => {
 });
 $("gridOrder").addEventListener("change", event => {
   gridOrder = event.target.value;
+  renderReviewGrid();
+});
+$("showStrata").addEventListener("change", event => {
+  showStrata = event.target.checked;
+  $("stratumLegend").hidden = !showStrata || !activationStrata || !Object.keys(activationStrata).length;
   renderReviewGrid();
 });
 try {

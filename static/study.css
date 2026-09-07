@@ -55,7 +55,11 @@
 .review-overview-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .review-overview h2 { margin: 0; font-size: 17px; }
 .review-overview-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+.review-overview-controls { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
+.stratum-toggle { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.stratum-toggle input { accent-color: var(--blue); }
 .stratum-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.stratum-legend[hidden] { display: none; }
 .stratum-legend-label { color: var(--muted); font-size: 11px; }
 .stratum-key, .review-tile-stratum { border-radius: 4px; font-size: 10px; font-weight: 700; line-height: 1.2; }
 .stratum-key { padding: 3px 6px; }
@@ -111,6 +115,7 @@
   .results-links .btn { flex: 1; text-align: center; }
   .review-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .review-overview-head { align-items: stretch; flex-direction: column; }
+  .review-overview-controls { justify-content: space-between; }
   .answer-actions { width: 100%; flex-direction: column; }
   .answer-actions .btn { width: 100%; }
   .patch-pane { display: block; }
