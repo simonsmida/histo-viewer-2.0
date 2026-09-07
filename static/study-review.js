@@ -8,7 +8,7 @@ let activationOrder = null;
 let activationStrata = null;
 let activationOrderRequested = false;
 let gridOrder = "sample";
-let showStrata = false;
+let displayMode = "judgment";
 const ADVANCE_DELAY_MS = 650;
 
 async function request(url, options) {
@@ -42,7 +42,9 @@ function render() {
   $("viewResults").disabled = study.completed < study.total || saving;
   $("resultsHelp").textContent = study.completed < study.total ? "Complete all patches to view results." : "Study complete. Results are ready.";
   $("gridOrder").disabled = study.completed < study.total || !activationOrder || saving;
-  $("showStrata").disabled = study.completed < study.total || !activationStrata || saving;
+  $("displayActivation").disabled = study.completed < study.total || !activationStrata || saving;
+  $("displayActivation").checked = displayMode === "activation";
+  $("stratumLegend").hidden = displayMode !== "activation" || !activationStrata || !Object.keys(activationStrata).length;
   requestActivationOrder();
   renderReviewGrid();
   requestAnimationFrame(updateContextLinks);
@@ -54,8 +56,8 @@ function requestActivationOrder() {
   request(`/api/studies/${id}/results`).then(results => {
     activationOrder = results.activation_order || [];
     activationStrata = results.activation_strata || {};
-    $("showStrata").disabled = !Object.keys(activationStrata).length || saving;
-    $("stratumLegend").hidden = !showStrata || !Object.keys(activationStrata).length;
+    $("displayActivation").disabled = !Object.keys(activationStrata).length || saving;
+    $("stratumLegend").hidden = displayMode !== "activation" || !Object.keys(activationStrata).length;
     $("gridOrder").disabled = !activationOrder.length || saving;
     renderReviewGrid();
   }).catch(() => {
@@ -80,13 +82,15 @@ function renderReviewGrid() {
     tile.type = "button";
     const selectedJudgment = itemIndex === index && pendingChoice ? pendingChoice : item.judgment;
     const judgmentClass = selectedJudgment || "unanswered";
-    tile.className = `review-tile ${judgmentClass}${itemIndex === index ? " current" : ""}`;
-    tile.setAttribute("aria-label", `Patch ${item.position}: ${selectedJudgment || "not assessed"}`);
+    const stratum = displayMode === "activation" ? activationStrata?.[item.position] : null;
+    const displayClass = stratum ? `stratum-${stratum}` : judgmentClass;
+    tile.className = `review-tile ${displayClass}${itemIndex === index ? " current" : ""}`;
+    const displayLabel = stratum ? `${stratum} activation sample` : (selectedJudgment || "not assessed");
+    tile.setAttribute("aria-label", `Patch ${item.position}: ${displayLabel}`);
     if (itemIndex === index) tile.setAttribute("aria-current", "true");
     const image = document.createElement("img");
     image.src = item.image_url;
     image.alt = `Patch ${item.position}`;
-    const stratum = showStrata ? activationStrata?.[item.position] : null;
     if (stratum) {
       const region = document.createElement("span");
       region.className = `review-tile-stratum ${stratum}`;
@@ -103,10 +107,13 @@ function renderReviewGrid() {
     number.className = "review-tile-number";
     number.textContent = String(item.position);
     const judgment = judgmentClass;
-    const status = document.createElement("span");
-    status.className = `review-tile-status ${judgment}`;
-    status.textContent = selectedJudgment ? selectedJudgment[0].toUpperCase() + selectedJudgment.slice(1) : "Not assessed";
-    meta.append(number, status);
+    meta.append(number);
+    if (displayMode === "judgment") {
+      const status = document.createElement("span");
+      status.className = `review-tile-status ${judgment}`;
+      status.textContent = selectedJudgment ? selectedJudgment[0].toUpperCase() + selectedJudgment.slice(1) : "Not assessed";
+      meta.append(status);
+    }
     tile.append(meta);
     tile.addEventListener("click", () => {
       if (saving) return;
@@ -202,11 +209,11 @@ $("gridOrder").addEventListener("change", event => {
   gridOrder = event.target.value;
   renderReviewGrid();
 });
-$("showStrata").addEventListener("change", event => {
-  showStrata = event.target.checked;
-  $("stratumLegend").hidden = !showStrata || !activationStrata || !Object.keys(activationStrata).length;
+document.querySelectorAll('input[name="gridDisplay"]').forEach(input => input.addEventListener("change", event => {
+  displayMode = event.target.value;
+  $("stratumLegend").hidden = displayMode !== "activation" || !activationStrata || !Object.keys(activationStrata).length;
   renderReviewGrid();
-});
+}));
 try {
   study = await request(`/api/studies/${id}`);
   $("backToViewer").href = `/?study_id=${encodeURIComponent(id)}`;

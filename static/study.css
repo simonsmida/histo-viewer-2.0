@@ -55,9 +55,13 @@
 .review-overview-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .review-overview h2 { margin: 0; font-size: 17px; }
 .review-overview-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
-.review-overview-controls { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
-.stratum-toggle { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; white-space: nowrap; }
-.stratum-toggle input { accent-color: var(--blue); }
+.review-overview-controls { display: flex; align-items: flex-start; justify-content: flex-end; gap: 14px; min-height: 47px; }
+.review-display-mode { border: 0; padding: 0; margin: 0; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.review-display-mode legend { padding: 0; margin-bottom: 6px; font-size: 11px; }
+.display-mode-options { display: flex; flex-direction: column; gap: 5px; }
+.display-mode-options label { display: flex; align-items: center; gap: 6px; }
+.display-mode-options input { accent-color: var(--blue); margin: 0; }
+.stratum-legend-slot { min-height: 26px; }
 .stratum-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 .stratum-legend[hidden] { display: none; }
 .stratum-legend-label { color: var(--muted); font-size: 11px; }
@@ -84,6 +88,11 @@
 .review-tile.present { border-color: #2f9e44; background: #f1faf2; }
 .review-tile.absent { border-color: #d94841; background: #fff4f3; }
 .review-tile.uncertain { border-color: #d99000; background: #fffaf0; }
+.review-tile.stratum-zero { border-color: #cbd5e1; background: #f8fafc; }
+.review-tile.stratum-low { border-color: #93c5fd; background: #eff6ff; }
+.review-tile.stratum-medium { border-color: #60a5fa; background: #dbeafe; }
+.review-tile.stratum-high { border-color: #2563eb; background: #bfdbfe; }
+.review-tile.stratum-top { border-color: #1e3a8a; background: #93c5fd; }
 .review-tile.current { outline: 2px solid var(--blue); outline-offset: 1px; }
 .review-tile img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; background: var(--soft); }
 .review-tile-meta { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: 5px; font-size: 10px; }

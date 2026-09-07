@@ -52,17 +52,15 @@
         <div>
           <h2 id="reviewOverviewTitle">Reviewed patches</h2>
           <p>All sampled patches and your assessments.</p>
-          <div class="stratum-legend" id="stratumLegend" hidden aria-label="Activation sampling regions">
-            <span class="stratum-legend-label">Sampled activation:</span>
-            <span class="stratum-key zero">Zero</span>
-            <span class="stratum-key low">Low</span>
-            <span class="stratum-key medium">Medium</span>
-            <span class="stratum-key high">High</span>
-            <span class="stratum-key top">Top</span>
-          </div>
         </div>
         <div class="review-overview-controls">
-          <label class="stratum-toggle"><input id="showStrata" type="checkbox" disabled> Show activation regions</label>
+          <fieldset class="review-display-mode">
+            <legend>Color patches by</legend>
+            <div class="display-mode-options">
+              <label><input type="radio" name="gridDisplay" value="judgment" checked> Your assessments</label>
+              <label><input id="displayActivation" type="radio" name="gridDisplay" value="activation" disabled> Activation regions</label>
+            </div>
+          </fieldset>
           <label class="grid-order">Order
             <select id="gridOrder" title="Available after all patch assessments are saved." disabled>
               <option value="sample">Sample order</option>
@@ -70,6 +68,16 @@
               <option value="activation-asc">Activation: low → high</option>
             </select>
           </label>
+        </div>
+      </div>
+      <div class="stratum-legend-slot">
+        <div class="stratum-legend" id="stratumLegend" hidden aria-label="Activation sampling regions">
+          <span class="stratum-legend-label">Sampled activation:</span>
+          <span class="stratum-key zero">Zero</span>
+          <span class="stratum-key low">Low</span>
+          <span class="stratum-key medium">Medium</span>
+          <span class="stratum-key high">High</span>
+          <span class="stratum-key top">Top</span>
         </div>
       </div>
       <div class="review-grid" id="reviewGrid"></div>
