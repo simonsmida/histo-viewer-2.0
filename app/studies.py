@@ -245,6 +245,7 @@ def study_results(record: dict) -> dict:
         "precision_top_high_present_n": sum(x["judgment"] == "present" for x in top_high),
         "auprc_precision_values": auprc_precision_values,
         "activation_order": [x["position"] for x in sorted(record["evaluation"], key=lambda x: x["score"], reverse=True)] if all(x["judgment"] for x in record["evaluation"]) else None,
+        "activation_strata": {str(x["position"]): x["stratum"] for x in record["evaluation"]} if all(x["judgment"] for x in record["evaluation"]) else None,
         "auprc": ap, "prevalence": sum(y for _, y in pairs) / len(pairs) if pairs else None,
         "pr_curve": curve, "activation_curve": activation, "judgment_counts": all_counts,
         "sampling": record["sampling"],

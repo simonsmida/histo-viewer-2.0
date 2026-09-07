@@ -55,6 +55,16 @@
 .review-overview-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .review-overview h2 { margin: 0; font-size: 17px; }
 .review-overview-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+.stratum-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.stratum-legend-label { color: var(--muted); font-size: 11px; }
+.stratum-key, .review-tile-stratum { border-radius: 4px; font-size: 10px; font-weight: 700; line-height: 1.2; }
+.stratum-key { padding: 3px 6px; }
+.review-tile-stratum { display: block; margin-top: 4px; padding: 3px 4px; text-align: center; }
+.stratum-key.zero, .review-tile-stratum.zero { background: #e2e8f0; color: #475569; }
+.stratum-key.low, .review-tile-stratum.low { background: #bfdbfe; color: #1e3a8a; }
+.stratum-key.medium, .review-tile-stratum.medium { background: #60a5fa; color: #082f6b; }
+.stratum-key.high, .review-tile-stratum.high { background: #2563eb; color: #fff; }
+.stratum-key.top, .review-tile-stratum.top { background: #1e3a8a; color: #fff; }
 .grid-order { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; white-space: nowrap; }
 .grid-order select { border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); padding: 7px 9px; font: inherit; }
 .grid-order select:disabled { color: var(--muted); background: var(--soft); }

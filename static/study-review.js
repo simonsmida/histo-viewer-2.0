@@ -5,6 +5,7 @@ let index = 0;
 let saving = false;
 let pendingChoice = null;
 let activationOrder = null;
+let activationStrata = null;
 let activationOrderRequested = false;
 let gridOrder = "sample";
 const ADVANCE_DELAY_MS = 650;
@@ -50,6 +51,8 @@ function requestActivationOrder() {
   activationOrderRequested = true;
   request(`/api/studies/${id}/results`).then(results => {
     activationOrder = results.activation_order || [];
+    activationStrata = results.activation_strata || {};
+    $("stratumLegend").hidden = !Object.keys(activationStrata).length;
     $("gridOrder").disabled = !activationOrder.length || saving;
     renderReviewGrid();
   }).catch(() => {
@@ -80,6 +83,17 @@ function renderReviewGrid() {
     const image = document.createElement("img");
     image.src = item.image_url;
     image.alt = `Patch ${item.position}`;
+    const stratum = activationStrata?.[item.position];
+    if (stratum) {
+      const region = document.createElement("span");
+      region.className = `review-tile-stratum ${stratum}`;
+      region.textContent = stratum[0].toUpperCase() + stratum.slice(1);
+      region.title = `${stratum[0].toUpperCase() + stratum.slice(1)} activation sample`;
+      region.setAttribute("aria-label", `${stratum[0].toUpperCase() + stratum.slice(1)} activation sample`);
+      tile.append(image, region);
+    } else {
+      tile.append(image);
+    }
     const meta = document.createElement("span");
     meta.className = "review-tile-meta";
     const number = document.createElement("span");
@@ -90,7 +104,7 @@ function renderReviewGrid() {
     status.className = `review-tile-status ${judgment}`;
     status.textContent = selectedJudgment ? selectedJudgment[0].toUpperCase() + selectedJudgment.slice(1) : "Not assessed";
     meta.append(number, status);
-    tile.append(image, meta);
+    tile.append(meta);
     tile.addEventListener("click", () => {
       if (saving) return;
       index = itemIndex;
