@@ -179,7 +179,8 @@ def create_study(data: StudyCreate) -> dict:
 def public_study(record: dict) -> dict:
     items = record["evaluation"]
     return {
-        "id": record["id"], "case_label": record["case_label"],
+        "id": record["id"], "case_id": record["case_id"], "concept_id": record["concept_id"],
+        "case_label": record["case_label"],
         "pattern": record["pattern"] or "No single pattern proposed",
         "assessment": record["assessment"], "confidence": record["confidence"],
         "total": len(items), "completed": sum(x["judgment"] is not None for x in items),
@@ -243,6 +244,7 @@ def study_results(record: dict) -> dict:
         "precision_top_high_n": len(top_high),
         "precision_top_high_present_n": sum(x["judgment"] == "present" for x in top_high),
         "auprc_precision_values": auprc_precision_values,
+        "activation_order": [x["position"] for x in sorted(record["evaluation"], key=lambda x: x["score"], reverse=True)] if all(x["judgment"] for x in record["evaluation"]) else None,
         "auprc": ap, "prevalence": sum(y for _, y in pairs) / len(pairs) if pairs else None,
         "pr_curve": curve, "activation_curve": activation, "judgment_counts": all_counts,
         "sampling": record["sampling"],

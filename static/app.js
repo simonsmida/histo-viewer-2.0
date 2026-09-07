@@ -207,7 +207,26 @@ function resetReviewForGroup() {
 }
 
 const studyUI = Object.fromEntries(["studyDiscoveryGrid", "studyStartForm", "studyReviewer", "studyAssessment",
-  "studyPattern", "studyConfidenceValue", "studyStart", "studyStartStatus"].map(id => [id, document.getElementById(id)]));
+  "studyPattern", "studyConfidenceValue", "studyStart", "studyStartStatus", "studyReturn", "studyReturnStatus",
+  "studyReturnLink", "studyReturnResults"].map(id => [id, document.getElementById(id)]));
+
+const returnStudyId = new URLSearchParams(location.search).get("study_id");
+let returnStudy = null;
+
+async function loadReturnStudy() {
+  if (!returnStudyId || !studyUI.studyReturn) return;
+  try {
+    returnStudy = await fetchJson(`/api/studies/${encodeURIComponent(returnStudyId)}`);
+    const encodedId = encodeURIComponent(returnStudyId);
+    studyUI.studyReturnLink.href = `/study/review?id=${encodedId}`;
+    studyUI.studyReturnResults.href = `/study/results?id=${encodedId}`;
+    studyUI.studyReturnResults.hidden = returnStudy.completed < returnStudy.total;
+    studyUI.studyReturnStatus.textContent = ` · ${returnStudy.completed}/${returnStudy.total} reviewed`;
+    studyUI.studyReturn.hidden = false;
+  } catch (error) {
+    returnStudy = null;
+  }
+}
 
 async function loadStudyDiscovery() {
   if (!state.currentCase || !state.currentConcept || !studyUI.studyDiscoveryGrid) return;
@@ -910,7 +929,9 @@ async function populateConcepts(caseId, selectedConceptId = null) {
     option.textContent = `${patchGroupLabel(concept)} (${concept.positive_patch_count.toLocaleString()} patches)`;
     elements.conceptSelect.appendChild(option);
   }
-  const nextConceptId = selectedConceptId || state.currentCase.default_concept_id || concepts[0]?.id;
+  const requestedConcept = selectedConceptId && concepts.some(concept => concept.id === selectedConceptId)
+    ? selectedConceptId : null;
+  const nextConceptId = requestedConcept || state.currentCase.default_concept_id || concepts[0]?.id;
   elements.conceptSelect.value = nextConceptId;
   await loadConcept(nextConceptId);
 }
@@ -925,7 +946,8 @@ async function initializeCases() {
     elements.caseSelect.appendChild(option);
   }
 
-  const firstCase = state.cases[0];
+  const preferredCase = returnStudy?.case_id && state.cases.find(item => item.id === returnStudy.case_id);
+  const firstCase = preferredCase || state.cases[0];
   if (!firstCase) {
     setStatus("No local histology images found.", true);
     return;
@@ -933,7 +955,8 @@ async function initializeCases() {
 
   elements.caseSelect.value = firstCase.id;
   await loadCase(firstCase.id);
-  await populateConcepts(firstCase.id, firstCase.default_concept_id);
+  const preferredConcept = preferredCase && returnStudy?.concept_id ? returnStudy.concept_id : firstCase.default_concept_id;
+  await populateConcepts(firstCase.id, preferredConcept);
 }
 
 function activateTab(tabName) {
@@ -1230,6 +1253,7 @@ async function init() {
   setActiveTool("pan");
   updateStatusZoom();
   try {
+    await loadReturnStudy();
     await initializeCases();
   } catch (error) {
     console.error(error);

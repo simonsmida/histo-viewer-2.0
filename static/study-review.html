@@ -10,7 +10,7 @@
   <main class="study-shell">
     <div class="review-layout">
       <section class="card patch-pane">
-        <div class="patch-panel-title">Expert study</div>
+        <div class="patch-panel-title"><span>Expert study</span><a class="panel-back" id="backToViewer" href="/">← HistoViewer</a></div>
         <details class="context-details" open>
           <summary>Broader tissue context</summary>
           <div class="context-options"><label><input id="showGuides" type="checkbox" checked> Show patch location</label></div>
@@ -53,6 +53,13 @@
           <h2 id="reviewOverviewTitle">Reviewed patches</h2>
           <p>All sampled patches and your assessments.</p>
         </div>
+        <label class="grid-order">Order
+          <select id="gridOrder" disabled>
+            <option value="sample">Sample order</option>
+            <option value="activation-desc">Activation: high → low</option>
+            <option value="activation-asc">Activation: low → high</option>
+          </select>
+        </label>
       </div>
       <div class="review-grid" id="reviewGrid"></div>
     </section>

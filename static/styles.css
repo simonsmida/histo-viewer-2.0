@@ -837,3 +837,12 @@ body {
 .confidence-choice.medium.selected { background: #edf4ff; border-color: #4b83d1; color: #28558e; box-shadow: 0 0 0 1px #4b83d1; }
 .confidence-choice.high.selected { background: #edf8ef; border-color: #2f9e6f; color: #216e4d; box-shadow: 0 0 0 1px #2f9e6f; }
 .study-start { display: block; width: 100%; text-align: center; }
+.study-return { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 14px; padding: 9px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-surface-alt); color: var(--text-secondary); font-size: 11px; }
+.study-return strong { color: var(--text-primary); font-size: 12px; }
+.study-return-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.study-return .btn { white-space: nowrap; }
+@media (max-width: 600px) {
+  .study-return { align-items: stretch; flex-direction: column; }
+  .study-return-actions { justify-content: stretch; }
+  .study-return-actions .btn { flex: 1; text-align: center; }
+}

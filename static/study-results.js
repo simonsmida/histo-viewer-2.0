@@ -63,6 +63,9 @@ function precisionRecall(svg, data, baseline) {
 
 try {
   const data = await getResults();
+  $("backToStudy").href = `/study/review?id=${encodeURIComponent(id)}`;
+  const backToViewer = document.querySelector(".results-links a:last-child");
+  if (backToViewer) backToViewer.href = `/?study_id=${encodeURIComponent(id)}`;
   $("title").textContent = `Pattern: ${data.pattern}`;
   $("subtitle").textContent = `${data.case_label} · ${data.reviewer}`;
   $("topHighPrecision").textContent = pct(data.precision_top_high);

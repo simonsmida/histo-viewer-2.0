@@ -4,6 +4,9 @@ let study;
 let index = 0;
 let saving = false;
 let pendingChoice = null;
+let activationOrder = null;
+let activationOrderRequested = false;
+let gridOrder = "sample";
 const ADVANCE_DELAY_MS = 650;
 
 async function request(url, options) {
@@ -36,30 +39,52 @@ function render() {
   $("next").textContent = "Next →";
   $("viewResults").disabled = study.completed < study.total || saving;
   $("resultsHelp").textContent = study.completed < study.total ? "Complete all patches to view results." : "Study complete. Results are ready.";
+  $("gridOrder").disabled = study.completed < study.total || !activationOrder || saving;
+  requestActivationOrder();
   renderReviewGrid();
   requestAnimationFrame(updateContextLinks);
+}
+
+function requestActivationOrder() {
+  if (!study || study.completed < study.total || activationOrderRequested || activationOrder) return;
+  activationOrderRequested = true;
+  request(`/api/studies/${id}/results`).then(results => {
+    activationOrder = results.activation_order || [];
+    $("gridOrder").disabled = !activationOrder.length || saving;
+    renderReviewGrid();
+  }).catch(() => {
+    activationOrderRequested = false;
+  });
+}
+
+function orderedReviewItems() {
+  if (gridOrder === "sample" || !activationOrder?.length) return study.evaluation;
+  const byPosition = new Map(study.evaluation.map(item => [item.position, item]));
+  const ordered = activationOrder.map(position => byPosition.get(position)).filter(Boolean);
+  return gridOrder === "activation-asc" ? ordered.reverse() : ordered;
 }
 
 function renderReviewGrid() {
   const grid = $("reviewGrid");
   if (!grid || !study) return;
   grid.replaceChildren();
-  study.evaluation.forEach((item, itemIndex) => {
+  orderedReviewItems().forEach(item => {
+    const itemIndex = study.evaluation.indexOf(item);
     const tile = document.createElement("button");
     tile.type = "button";
     const selectedJudgment = itemIndex === index && pendingChoice ? pendingChoice : item.judgment;
     const judgmentClass = selectedJudgment || "unanswered";
     tile.className = `review-tile ${judgmentClass}${itemIndex === index ? " current" : ""}`;
-    tile.setAttribute("aria-label", `Patch ${itemIndex + 1}: ${selectedJudgment || "not assessed"}`);
+    tile.setAttribute("aria-label", `Patch ${item.position}: ${selectedJudgment || "not assessed"}`);
     if (itemIndex === index) tile.setAttribute("aria-current", "true");
     const image = document.createElement("img");
     image.src = item.image_url;
-    image.alt = `Patch ${itemIndex + 1}`;
+    image.alt = `Patch ${item.position}`;
     const meta = document.createElement("span");
     meta.className = "review-tile-meta";
     const number = document.createElement("span");
     number.className = "review-tile-number";
-    number.textContent = String(itemIndex + 1);
+    number.textContent = String(item.position);
     const judgment = judgmentClass;
     const status = document.createElement("span");
     status.className = `review-tile-status ${judgment}`;
@@ -156,8 +181,13 @@ $("toggleReviewGrid").addEventListener("click", () => {
   button.textContent = hidden ? "Hide patches" : "Show patches";
   button.setAttribute("aria-expanded", String(hidden));
 });
+$("gridOrder").addEventListener("change", event => {
+  gridOrder = event.target.value;
+  renderReviewGrid();
+});
 try {
   study = await request(`/api/studies/${id}`);
+  $("backToViewer").href = `/?study_id=${encodeURIComponent(id)}`;
   const unfinished = study.evaluation.findIndex(item => !item.judgment);
   index = unfinished < 0 ? study.total - 1 : unfinished;
   render();
