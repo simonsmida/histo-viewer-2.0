@@ -10,6 +10,7 @@ let activationOrderRequested = false;
 let gridOrder = "sample";
 let showStrata = false;
 const ADVANCE_DELAY_MS = 650;
+const STRATUM_LABELS = {zero: "Zero", low: "Low", medium: "Mid", high: "High", top: "Top"};
 
 async function request(url, options) {
   const response = await fetch(url, options);
@@ -81,7 +82,7 @@ function renderReviewGrid() {
     const judgmentClass = selectedJudgment || "unanswered";
     const stratum = showStrata ? activationStrata?.[item.position] : null;
     tile.className = `review-tile ${judgmentClass}${itemIndex === index ? " current" : ""}`;
-    const displayLabel = stratum ? `${stratum} activation sample` : (selectedJudgment || "not assessed");
+    const displayLabel = stratum ? `${STRATUM_LABELS[stratum] || stratum} activation sample` : (selectedJudgment || "not assessed");
     tile.setAttribute("aria-label", `Patch ${item.position}: ${displayLabel}`);
     if (itemIndex === index) tile.setAttribute("aria-current", "true");
     const image = document.createElement("img");
@@ -90,11 +91,12 @@ function renderReviewGrid() {
     tile.append(image);
     let region = null;
     if (stratum) {
+      const stratumLabel = STRATUM_LABELS[stratum] || stratum;
       region = document.createElement("span");
       region.className = `review-tile-stratum ${stratum}`;
-      region.textContent = stratum[0].toUpperCase() + stratum.slice(1);
-      region.title = `${stratum[0].toUpperCase() + stratum.slice(1)} activation sample`;
-      region.setAttribute("aria-label", `${stratum[0].toUpperCase() + stratum.slice(1)} activation sample`);
+      region.textContent = stratumLabel;
+      region.title = `${stratumLabel} activation sample`;
+      region.setAttribute("aria-label", `${stratumLabel} activation sample`);
     }
     const meta = document.createElement("span");
     meta.className = "review-tile-meta";
