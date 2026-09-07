@@ -91,15 +91,14 @@ function renderReviewGrid() {
     const image = document.createElement("img");
     image.src = item.image_url;
     image.alt = `Patch ${item.position}`;
+    tile.append(image);
+    let region = null;
     if (stratum) {
-      const region = document.createElement("span");
+      region = document.createElement("span");
       region.className = `review-tile-stratum ${stratum}`;
       region.textContent = stratum[0].toUpperCase() + stratum.slice(1);
       region.title = `${stratum[0].toUpperCase() + stratum.slice(1)} activation sample`;
       region.setAttribute("aria-label", `${stratum[0].toUpperCase() + stratum.slice(1)} activation sample`);
-      tile.append(image, region);
-    } else {
-      tile.append(image);
     }
     const meta = document.createElement("span");
     meta.className = "review-tile-meta";
@@ -113,6 +112,8 @@ function renderReviewGrid() {
       status.className = `review-tile-status ${judgment}`;
       status.textContent = selectedJudgment ? selectedJudgment[0].toUpperCase() + selectedJudgment.slice(1) : "Not assessed";
       meta.append(status);
+    } else if (region) {
+      meta.append(region);
     }
     tile.append(meta);
     tile.addEventListener("click", () => {
